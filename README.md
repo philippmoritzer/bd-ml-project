@@ -11,6 +11,8 @@
 
 ## InfluxDB basics
 
+### flux query language
+
 ## influxdb vs timescale vs prometheus
 
 # Tutorial
