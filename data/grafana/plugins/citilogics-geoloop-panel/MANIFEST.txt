@@ -1,0 +1,94 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "community",
+  "signedByOrg": "grafana",
+  "signedByOrgName": "Grafana Labs",
+  "plugin": "citilogics-geoloop-panel",
+  "version": "1.1.2",
+  "time": 1622740848882,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "data_formatter.js": "23c752408aeecde492c9d700376a1312d63ca2c5d47298b7c4d7a512f69d37f1",
+    "CHANGELOG.md": "7a7e2f8085497456261402bb9df99f5a10dfccc0658adc76c9791e727bd6ba85",
+    "css/geoloop.light.css": "00e02b1e6653bbcd0f648f6ab21939976a25bb6ca5c59a48fa808fb3630ec542",
+    "css/geoloop-panel.css": "5b0f7f7f44d8e8b7383887e79decaf41e765de3a7a91313aa951b0cef5e711a0",
+    "css/geoloop.dark.css": "e94c2ab5124b1c35020335f950ec5d375bbfbe21a4a50fd641a89afe9f3a342e",
+    "images/overview.png": "9153b705201871cb203094d57e02ac29c16e2cc570b41270d106dd59504b69b0",
+    "images/colorRamps/Set3.png": "f1cc606e37f5eadd248dd251868752557d0d6c82f6d8604a72a0443129a9a33c",
+    "images/colorRamps/Set2.png": "ad84f21092793a674b245f0f110b26e6f8a9a6278dcc7c41e22b00e94d121a35",
+    "images/colorRamps/Set1.png": "f340c8a08840bcc046b2b3d48f3f2963d13a0ff90076330cf2d536dab0bf2e08",
+    "images/colorRamps/RdBu.png": "3410ee4ab0306fc499b8cb73def99532da5ee2d9fa76b1040335035b4ff35661",
+    "images/colorRamps/Purples.png": "f548cc0742f2dd6207e8e8a8cc72ba73f16ba8d311982881fe5e5b673aebddaf",
+    "images/colorRamps/YlOrRd.png": "20e04350a9a67fbd3d0347b96ec8f085290d19b615e9ce5379d7bb03f9018714",
+    "images/colorRamps/Reds.png": "5b3366c2eac72b3345895ebb4180c067365a90eef3bbd68c3814215629e3ca99",
+    "images/colorRamps/YlGn.png": "9f0b599eb076468d389a8062ad7e7da905492b343694bd4804c1d32d2b58c2c0",
+    "images/colorRamps/RdGy.png": "edcd9c10a77352ba51415fb7fd566567fb445ed6e822f71271ea1a8901e181d2",
+    "images/colorRamps/Pastel2.png": "0243f56d5ff5290ab067bd0f757319d0eeee9833c31b92606bdbbc10ac8158d2",
+    "images/colorRamps/PuBuGn.png": "1176d508b1c9419966cbe373674bb453f996b924095e21cd7a035292669d6140",
+    "images/colorRamps/GnBu.png": "35ca238527129c31d3e84065bbc1ad58870cbb61f778be5045d9867ecda391f9",
+    "images/colorRamps/Pastel1.png": "6f95081be142804f2855b9ec30f9b19d8e87493f3a6d0dc3a8541c3602e6dccc",
+    "images/colorRamps/magma.png": "a28f6e89e179cd1f470c11698bcef8f99d789f6761bbdb8c1c436f8dec02d2c2",
+    "images/colorRamps/PiYG.png": "dde02779d3e0d529edbeba1e611a816289e5465b97bde2526869766310ef6ae0",
+    "images/colorRamps/Blues.png": "840f3bce4fd13a9700445494c3b0631f0bd384bb3e0d4514036d40a3fd66faf0",
+    "images/colorRamps/PuRd.png": "371902140324028e643bac4ce0458cd2fb819c4043aebfba105a92ed3ef5195d",
+    "images/colorRamps/RdPu.png": "7ad7150c1352a3093e09c0065c78fa92bd2a3e63ac4bdaf4c467d8c0fde49830",
+    "images/colorRamps/Oranges.png": "e277fb565b9dd6dada5d3ed3907500e33c29e5e792d201f4144a69d44f90e387",
+    "images/colorRamps/Greens.png": "b8453de0fc76e54e2f755a8682e7b15a70cadc5b282ff263fbbb6966b5486300",
+    "images/colorRamps/YlOrBr.png": "96fa6760a6baa87afe10ba7ca57cf720bb06140c610ea4fd21f6eed8df3d59df",
+    "images/colorRamps/RdYlGn.png": "096ad4fb81b386ec815b2a17914bda422ea3afbdec3ecde82364831930be485e",
+    "images/colorRamps/plasma.png": "c1a6a17e943c39ff753504c767d15699f1e73c9517a95556cd93dc405c60644e",
+    "images/colorRamps/Accent.png": "37c2dd029278e08c92d3cd814b987630d61f8766d0eba84782ff35862f770db8",
+    "images/colorRamps/cool.png": "5dd91d7cafee4c163bf6123192ef30ef806096266a21ac8f67304a5a748da534",
+    "images/colorRamps/Spectral.png": "15f49c98ade43b886f7d00ca8e6f1ee5da4b71cd98943234006c1cebea418edf",
+    "images/colorRamps/YlGnBu.png": "c4222398fba50ac077804f6b580d1f13155fc0b4c92afd4daaa2905594f5517f",
+    "images/colorRamps/inferno.png": "728f0b941ddb057f525206a3c7849c2aa2867feaa4edae108787c4a7c73eb282",
+    "images/colorRamps/RdYlBu.png": "a7ca5e61401360c2525cba7bcc1637a0c75e80091cb0b4fa7a9dd6c2066a7288",
+    "images/colorRamps/OrRd.png": "57dcdc4db3c1e63997c332395ff42a6031b3784858e3fd573876a524c0fb441e",
+    "images/colorRamps/BuPu.png": "e8d483e3b75482115b67582e6989d7ed868f697c8a1345ae3d538dbf62c1ea5c",
+    "images/colorRamps/warm.png": "90bacb8c0295b8b4251df7d61c0e52ddf4eb8caed0bc242a18ba63aa411e5ff0",
+    "images/colorRamps/Paired.png": "4bbfb05b4acbf3bf780af4484f3da4564acd9f20323d16e7c8907b124e685b08",
+    "images/colorRamps/PRGn.png": "48331f08c24f65e7c43396cc537f17bf610073dda5314e0bac8d0ac381737919",
+    "images/colorRamps/BrBG.png": "7d993f72bcc1009960292ad46ca60a028bab9858b246b43703e71d93826ed074",
+    "images/colorRamps/cubehelix.png": "a24c43ff1243f7b04dabc9e7d5b3ab201e5f544548a157a3a6f813d14920026b",
+    "images/colorRamps/Greys.png": "9b00a0341c378568dd17da7acf3a4acb6adffec35258943a0c6ab294dec74ef7",
+    "images/colorRamps/PuBu.png": "d3d7b94bb199e0bcfefc95c13e132ba0b0f67057f59047fb88205029364c91d0",
+    "images/colorRamps/Dark2.png": "6ab3eff927ea030c175618f8636eabe445337631809cfc6af858a814ca8de42a",
+    "images/colorRamps/BuGn.png": "e56a6d787eac16881a4d98ed34590594dbfa3f987668b0e57318d40f2892769b",
+    "images/colorRamps/PuOr.png": "ca17ec476bd4bc0e2d2d0ac18f7dc3c22bdf6c61d68b3ed0941a38b41d1c65af",
+    "images/colorRamps/rainbow.png": "585701dff0757e033fc22e432459bfef7b1bb2936f0c21b3c6385e3bddc0f094",
+    "images/colorRamps/viridis.png": "53a468a50b33ad17fb07b8214d2d1a0fbc27de1229ff6d882d96cf87b398dd7a",
+    "images/rain.gif": "583a18eacd2dee36e2843278b8407147cc9f2ba3ebc7417df66c0b3c38cd1a30",
+    "images/geoloop-icon.png": "11f4600911d501fd5240c0e102524aad983be6acc08224765c6c74f12caeaa4c",
+    "images/timeseries-query.png": "6a8d9d958fcf25bd15446c860fadc410c4091167ce7ab15e35384b56f43a78c4",
+    "images/geoloop-options.png": "d577061d829f1ca330248c4c3afbaf90aa584a5072ba97ae16379ce77d5e234c",
+    "module.html": "1106ebeb1f68c0fc13dad4a2d7ce4d097729cc5c8dc9c5a3806bde32a3788264",
+    "map_renderer.js.map": "d344f32d2bf7aebfb3488a02af323dbf4254d73b7949a68483ea3beaaa763ad1",
+    "module.js.map": "ca910ebd6677c84ab82ada005476f7c5997f2bf0389fa29865e855eeefad6fbd",
+    "plugin.json": "21edaeca8a54b10b231c5c6f03bb6b2e1b0e9113b3623290be427cde096b67b6",
+    "libs/d3.js": "697d8d40c2a0ed3282bb5ae61ac8b3ea48c04fe3e4ebf381fed28946359008a8",
+    "libs/mapbox-gl.js": "dad6b0f62cbfdb6efdde1be99d76ae9a1d7e2feb4a607b422e9965a6ef98c0c1",
+    "README.md": "dce5d86507a61591c2e0c71248ed0caa1e6a069da6764a7c2e1271401cd687ef",
+    "data_formatter.js.map": "c3fccf2440fe4d99131d0f0235a2b16229246d37a9c0a988c4a5087db739a6b7",
+    "module.js": "9bf8bd82ed0ebae1a929b59160cb448353a92899b1e5246f6fc9320f8ab02241",
+    "geoloop_ctrl.js": "b187c0fc90cebcd20ff6effa6d13f10d05b35cee20cf60ad4a61c92763ea1187",
+    "map_renderer.js": "f80602636ee1694fe1175e6c02e1c84d2e04475582f6d47cf80a6f6714dc7501",
+    "geoloop_ctrl.js.map": "7ecf889c984750f5f68144231c6ee0a8e92d14bfd84c71b5686af9da3f4beb60",
+    "geoloop.js.map": "1e811e5429351952ff0e80ed63d9b6c424f33a364152e8171d2e182cdeee25cb",
+    "geoloop.js": "c13b9fbc6ec1d2cd1564abf43f06a3b979f08a8cdeedd88c8065478e624d5001",
+    "partials/editor.html": "d29582ccb8bc2f7c53653ce4a4b89812afab52d80d5e60db46a948a9f97c6f67"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.1
+Comment: https://openpgpjs.org
+
+wqEEARMKAAYFAmC5D3EACgkQfk0ManCIZudtFAIJAadLKol558zKOrK5rHIb
+cZfoYHuUmloGz8/teWfnIY1aGmMSLk/4+TWDunxGyAr7E4KMuxfPp85+NAw9
+X40mvfWSAgEB8opOdOYmqoTGnoc/PgP6CB140jCnX7y+z8hcXDePiYTiSriM
++7YBy1WERGVpvzqtYKSo4SDAMuz8kpm2j/94eQ==
+=bEAh
+-----END PGP SIGNATURE-----

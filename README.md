@@ -18,19 +18,34 @@
 # Tutorial
 
 ## Goals
+The purpose of this project is to process a large amount of time series data. The data is stored using a NoSQL approach with InfluxDB. A Grafana Dashboard is constructed to visualize the data, and appropriate visualisation tools are employed. The data will be parsed using
+Python and processed to InfluxDB using functional programming in combination with the python
+client library provided by InfluxDB.
+
+## The data - Movebank: Animal tracking
 
 ## Prerequisites
 
 - Python 3.10 https://www.python.org/downloads/
-- Docker installed
-- docker-compose installed
+- Docker (20+, Version 20.10.13 is used for this project) https://docs.docker.com/get-docker/
+- docker-compose installed (1.20+, Version 1.29.2 is used for this project) https://docs.docker.com/compose/install/
+
+It is advised to use the most recent versions.
+The following commands can be used to determine whether the requirements have been met:
+
+```bash
+$ python3 --verison
+# Output: Python 3.10.*
+$ docker -version
+# Output: Docker version 20.10.13, build a224086
+$ docker-comopse --version
+# Output: docker-compose version 1.29.2, build 5becea4c
+```
 
 ## Spinning up the composition
 ###
 ### docker-compose
-To spin up our environment easily, there is no need to install InfluxDB or Grafana locally. Although you can do it
-it is easier to spin up the services using docker-compose. For this purpose a docker-compose.yml File will be created in the directory root.
-
+There is no need to install InfluxDB or Grafana locally to quickly spin up our environment. Although it is possible to follow along using locally installed instances, docker-compose makes it easier to spin up the services. If no project root has yet been created, create a new folder for the project and add the following ``docker-compose.yml`` file:
 ```yaml
 version: "3.9"
 
@@ -46,8 +61,6 @@ services:
     env_file:
       - './env/env.influxdb'
     volumes:
-      # Data persistency
-      # sudo mkdir -p /srv/docker/influxdb/data
       - ./data/influxdb:/var/lib/influxdb2
     networks:
       - network1
@@ -57,14 +70,10 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
-    env_file:
-      - './env/env.grafana'
     user: "0"
     links:
       - influxdb
     volumes:
-      # Data persistency
-      # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
       - ./data/grafana:/var/lib/grafana
     networks:
       - network1
@@ -72,6 +81,21 @@ services:
 networks:
   network1:
 ```
+
+Volumes are used by both InfluxDB and grafana. The next step is to make sure that a directory called data is created in the project root directory, which contains two empty subdirectories called grafana/ and influxdb/. These directories will be filled to persist data when using these applications.
+
+```
+- <project-root> 
+  - data/
+    - grafana/
+    - influxdb/
+  - env/
+    - env.app
+    - env.influxdb
+  docker-compose.yml
+```
+
+> Note for Unix-Users: If the Grafana-Container fails to start due to permission errors, the permission of the ./data/grafana Folder should be changed to 472 and made sure it is owned by the account using it.
 
 Docker-compose is used to spin up a local instance of InfluxDB and Grafana. To start both services, enter 
 
