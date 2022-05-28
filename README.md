@@ -1,5 +1,5 @@
-# Building and visualizing a NoSQL time series data store using InfluxDB, Grafana and Python
-- [Building and visualizing a NoSQL time series data store using InfluxDB, Grafana and Python](#building-and-visualizing-a-nosql-time-series-data-store-using-influxdb-grafana-and-python)
+# Building and visualizing a NoSQL time series data store using InfluxDB, Python and Grafana
+- [Building and visualizing a NoSQL time series data store using InfluxDB, Python and Grafana](#building-and-visualizing-a-nosql-time-series-data-store-using-influxdb-python-and-grafana)
 - [Introduction](#introduction)
 - [Basics](#basics)
   - [NoSQL basics](#nosql-basics)
@@ -18,6 +18,7 @@
   - [Writing the client application](#writing-the-client-application)
     - [Setting up the environment](#setting-up-the-environment)
     - [Setting up the application](#setting-up-the-application)
+    - [Implementing functionality](#implementing-functionality)
   - [Setting up Grafana](#setting-up-grafana)
   - [](#)
   - [Python](#python)
@@ -179,6 +180,11 @@ $ python3 main.py
 
 For the dependencies a ``requirements.txt``file is created in the project's root directory with following content to install the python client library for InfluxDB using pip. To make sure they are locally available, run the follwing command:
 
+
+```properties
+influxdb-client == 1.29.0
+```
+
 ```bash
 $ pip3 install -r requirements.txt
 
@@ -186,10 +192,6 @@ $ pip3 install -r requirements.txt
 
 Next, we're going to dockerize the application. To do so, a Dockerfile will be created. Docker ensures that the application can run with the dependencies defined regardless of the system's environment.
 
-
-```properties
-influxdb-client == 1.29.0
-```
 
 ```Dockerfile
 # syntax=docker/dockerfile:1
@@ -206,8 +208,51 @@ COPY . .
 CMD ["python3","-u","./main.py"]
 ```
 
+Create a ``run.sh`` script (or ``.bat`` for Windows Users) that executes following commands in a row:
 
-Furthermore create a folder ``app/`` including a file ``connect_to_influx.py``.
+```bash
+$ docker build --no-cache -t influxdb-sample .
+$ docker network create project_network1
+$ docker run --network=project_network1 --env-file ./env/env.app influxdb-sample
+```
+
+This script builds our application into a Docker Image, creates a network and starts the container while making sure it can communicate with the services on the same network (network1).
+
+```bash
+$ ./run.sh
+# Output: Hello World
+```
+Every time we want to start the application locally we can run the ``run.sh``script.
+
+### Implementing functionality
+
+First a function for connecting to InfluxDB will be implemented. create a folder ``app/`` including a file ``connect_to_influx.py``. The content of the file will be as follows:
+
+```python
+import time
+from influxdb_client import InfluxDBClient
+
+def connect_to_influxdb(url, token, org, retries=10, tried=0) -> InfluxDBClient:
+    print("Connecting to InfluxDB on " + url)
+    client = InfluxDBClient(url=url, token=token, org=org, debug=True)
+    health = client.health()
+
+    if health.status == "pass":
+        print("Connected to InfluxDB on " + url + "/")
+        return client
+    else:
+        if tried < retries:            
+            print("Connection to {} refused, retrying {} times.".format(url, (retries-tried)))     
+            tried += 1   
+            time.sleep(10)
+            return connect_to_influxdb(url, token, org, retries, tried)
+        else:            
+            raise ConnectionError("Connection to influxdb failed.")
+```
+
+The file contains a function that returns an InfluxDBClient connection object. The method invokes the constructor with the required information (URL, API-Token, organisation). If the connection is successful and healthy, this custom wrapper method returns the InfluxDBClient object. If it is not, it tries to connect to the given InfluxDB instance as many times as specified. If it fails, the application will exit with a connection error.
+
+When
 
 ## Setting up Grafana
 
