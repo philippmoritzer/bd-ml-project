@@ -277,6 +277,80 @@ token = os.environ['INFLUX_TOKEN'] or "<token>"
 org = os.environ['INFLUX_ORG'] or 'pmoritzer'
 ```
 
+Following that, a function will be defined to parse each row of the CSV containing the bird migration data. We will need the following fields for this analysis:
+
+- timestamp
+- event-id
+- lon
+- lat
+- manually-marked-outlier
+- individual-taxon-canonical-name
+- tag-local-identifier
+- individual-local-identifier
+
+The remaining columns have little value for data analysis, so they are not considered in this project. The InfluxDB interface's Point-Object is returned by the following function. To create the dynamic data structure, we can use the provided Builder-Pattern. Each Point will later be stored as a dataset in an InfluxDB bucket.
+
+```python
+def parse_row(row: OrderedDict):   
+    
+    return Point("migration-point").tag("type", "migration-value").measurement("migration") \
+        .field("event-id", row['event-id']) \
+        .field("lon", Decimal(row['location-long'])) \
+        .field("lat", Decimal(row['location-lat'])) \
+        .field("manually-marked-outlier", row['manually-marked-outlier']) \
+        .field("individual-taxon-canonical-name", row['individual-taxon-canonical-name']) \
+        .field("tag-local-identifier", row['tag-local-identifier']) \
+        .field("individual-local-identifier", row['individual-local-identifier']) \
+        .time(row['timestamp'])               
+
+```
+
+The function above is then called for each row of the csv file using functional programming. It must be ensured that the.csv dataset mentioned earlier is located in the project's root directory and is named ``migration_original.csv``.
+
+```python
+data = rx \
+    .from_iterable(DictReader(open('migration_original.csv', 'r'))) \
+    .pipe(operators.map(lambda row: parse_row(row)))
+```
+
+The command above maps each row from the source data set to an Ordered Dictionary entry and parses it to a. Afterwards we are left with a dictionary that is readable by the InfluxDB data client.
+
+> Example adapted from: https://github.com/influxdata/influxdb-client-python/blob/master/examples/import_data_set.py (visited: June 4th, 22:00)
+
+The code below establishes a connection to InfluxDB, creates a new bucket using the Bucket API, and writes data to InfluxBD using the Write API, all of which are provided by the Python library.
+
+
+```python
+with connect_to_influxdb(url, token, org) as client:
+    bucket_name = 'bird-migration'
+    bucket_api = client.buckets_api()
+    old_bucket = bucket_api.find_bucket_by_name(bucket_name=bucket_name)
+    if old_bucket:
+        try:
+            bucket_api.delete_bucket(old_bucket)
+        except:
+            exit()
+    bucket = bucket_api.create_bucket(bucket_name=bucket_name, org=org)
+
+    with client.write_api(write_options=WriteOptions(batch_size=50000, flush_interval=10000)) as write_api:        
+        write_api.write(bucket="bird-migration", record=data)
+
+    query = 'from(bucket:"bird-migration")' \
+            ' |> range(start: 0, stop: now())'
+    result = client.query_api().query(query=query)
+    print()
+    print("=== results ===")
+    print()
+```
+
+The results will be validated by committing the following flux query using the Python code:
+
+```influx
+from(bucket:"bird-migration") |> range(start: 0, stop: now())
+```
+
+Using the InfluxDB web client, run the same flux query to see if the data is in our database.
+
 ## Setting up Grafana
 
 ## 
