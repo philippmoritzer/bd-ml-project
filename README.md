@@ -216,7 +216,7 @@ $ docker network create project_network1
 $ docker run --network=project_network1 --env-file ./env/env.app influxdb-sample
 ```
 
-This script builds our application into a Docker Image, creates a network and starts the container while making sure it can communicate with the services on the same network (network1).
+This script builds our application into a Docker Image, creates a network and starts the container while making sure it can communicate with the services on the same network, ``network1``.
 
 ```bash
 $ ./run.sh
@@ -252,7 +252,30 @@ def connect_to_influxdb(url, token, org, retries=10, tried=0) -> InfluxDBClient:
 
 The file contains a function that returns an InfluxDBClient connection object. The method invokes the constructor with the required information (URL, API-Token, organisation). If the connection is successful and healthy, this custom wrapper method returns the InfluxDBClient object. If it is not, it tries to connect to the given InfluxDB instance as many times as specified. If it fails, the application will exit with a connection error.
 
-When
+The application logic for writing our sample data to InfluxDB must now be implemented. First, we'll import the database connection function we just wrote, as well as any other imports required for this logic. Among these are the InfluxDB client library, csv for handling CSV data, and the ```rx``` functional programming library.
+
+```python
+from app.connect_to_influx import connect_to_influxdb
+
+from influxdb_client import Point, WriteOptions
+
+from csv import DictReader
+from collections import OrderedDict
+from decimal import Decimal
+import os
+
+# rx for functional programming
+import rx # functional programming library
+from rx import operators
+```
+
+The parameters for connecting to the database will be loaded using environment variables in the following step. It must be ensured that the application is started using Docker with env-files. The script will fail if these environment variables are not specified.
+
+```python
+url = os.environ['INFLUX_URL'] or 'http://localhost:8086'
+token = os.environ['INFLUX_TOKEN'] or "<token>"
+org = os.environ['INFLUX_ORG'] or 'pmoritzer'
+```
 
 ## Setting up Grafana
 

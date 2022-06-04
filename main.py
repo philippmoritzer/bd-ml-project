@@ -1,17 +1,15 @@
+from app.connect_to_influx import connect_to_influxdb
 
-from ast import parse
+from influxdb_client import Point, WriteOptions
+
 from csv import DictReader
 from collections import OrderedDict
 from decimal import Decimal
-
-from influxdb_client import InfluxDBClient, Point, WriteOptions
 import os
 
 #import rx for functional programming
-import rx
+import rx # functional programming library
 from rx import operators
-
-from app.connect_to_influx import connect_to_influxdb
 
 url = os.environ['INFLUX_URL'] or 'http://localhost:8086'
 token = os.environ['INFLUX_TOKEN'] or '4t6SUQYXFtiFuUcRLO7vcdp9SmUS8uW5L5WCUP2COq9vQ5OoIzK68fi9NiY0a8Y0eEWB-f4FeVQZeBtL2DcLaA=='
