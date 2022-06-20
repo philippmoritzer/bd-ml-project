@@ -1,10 +1,12 @@
 # Building and visualizing a NoSQL time series data store using InfluxDB, Python and Grafana
+
 - [Building and visualizing a NoSQL time series data store using InfluxDB, Python and Grafana](#building-and-visualizing-a-nosql-time-series-data-store-using-influxdb-python-and-grafana)
 - [Introduction](#introduction)
 - [Basics](#basics)
   - [NoSQL basics](#nosql-basics)
   - [NoSQL vs relational Databases](#nosql-vs-relational-databases)
   - [TimeSeries databases](#timeseries-databases)
+  - [Why use a time series data](#why-use-a-time-series-data)
   - [InfluxDB basics](#influxdb-basics)
     - [flux query language](#flux-query-language)
   - [influxdb vs timescale vs prometheus](#influxdb-vs-timescale-vs-prometheus)
@@ -27,19 +29,26 @@
 - [Summary](#summary)
 
 # Introduction
+Big Data, IoT, and analytics, and as a result, new methods of storing this fluid data have emerged. Almost all streaming data, particularly IoT data, but also real-time analytics and server and application monitoring, has a time stamp and thus is timeseries data. This project will go on to demonstrate the differences between traditional databases and NoSQL time series databases, why they are used, and how to build a project on top of them. The completed project stores, visualizes, and analyzes data using InfluxDB2, Python, and Grafana using time-stamped CSV data containing bird migration data as a time analytics approach.
 
 # Basics
 ## NoSQL basics
 
 ## NoSQL vs relational Databases
-
+https://db-engines.com/en/blog_post/71
 ## TimeSeries databases
 A time series is a collection of values that are organized by time. For example, stock prices may fluctuate throughout the day as trades are executed, or a weather sensor may take atmospheric temperatures every minute. Time-series data are any events that are recorded over time, whether on a regular or sporadic basis. A time-series database is designed to facilitate the retrieval and statistical analysis of time-series data. While time-series data such as orders, shipments, logs, and so on have long been stored in relational databases, the data sizes and volumes were frequently insignificant. New special-purpose databases were required as data grew faster and larger. Time-series databases, among other things, address the needs of growing, high-velocity data volumes from IoT, event and application logs, ad tech, and fintech. These workloads are frequently write-intensive. As a result, memory buffering is frequently used in time-series databases to support fast writes and reads.
 
-source: Fundamentals of Data Engineering: Plan and Build Robust Data Systems von Joe Reis (Author), Matt Housley (Author), O'REILLY
+source: Fundamentals of Data Engineering: Plan and Build Robust Data Systems von Joe Reis (Author), Matt Housley (Author), (June 2022) O'REILLYs
+
+## Why use a time series data
+Time series date often needs to focus on fast
+
+Paul Dix, "Why Build a Time Series Data Platform?", 20.07.2017 https://db-engines.com/en/blog_post/71
 
 ## InfluxDB basics
-InfluxDB is created by InfluxData and is the most popular NoSQL time series data according to https://db-engines.com/. (June 2022) O'REILLY
+According to https://db-engines.com/, InfluxDB is the most popular NoSQL time series data created by InfluxData. Its primary application is handling massive amounts of time-stamped data. Collecting IoT data is a common example because every data set in IoT is time-based. However, it is frequently used for Analytics as well as IoT data, for example, in this project time-stamped data for bird migration will be handled using InfluxDB2.
+The first version of InfluxDB came out in 2013 and the 1.x version is still commonly used. However, in 2020 InfluxDB was released as a stable version and is the way to go. It features a new query language, which will be explained in the next section, as well as a standalone binary with a graphical web interface to explore data.
 
 ### flux query language
 
