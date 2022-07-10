@@ -4,12 +4,13 @@
 - [Introduction](#introduction)
 - [Basics](#basics)
   - [NoSQL basics](#nosql-basics)
-  - [NoSQL vs relational Databases](#nosql-vs-relational-databases)
-  - [TimeSeries databases](#timeseries-databases)
-  - [Why use a time series data](#why-use-a-time-series-data)
+  - [NoSQL vs Relational Databases](#nosql-vs-relational-databases)
+  - [Time Series Databases](#time-series-databases)
+  - [Why use a time series database](#why-use-a-time-series-database)
   - [InfluxDB basics](#influxdb-basics)
     - [Flux Query Language](#flux-query-language)
-  - [InfluxDB vs Timescale vs Prometheus](#influxdb-vs-timescale-vs-prometheus)
+    - [InfluxDB vs Timescale vs Prometheus](#influxdb-vs-timescale-vs-prometheus)
+    - [Classifiying Data in InfluxDB using Naive Bayes Classification](#classifiying-data-in-influxdb-using-naive-bayes-classification)
 - [Tutorial](#tutorial)
   - [Goals](#goals)
   - [The data - Movebank: Animal tracking](#the-data---movebank-animal-tracking)
@@ -27,7 +28,11 @@
   - [Grafana](#grafana)
   - [Run sample project](#run-sample-project)
 - [Summary](#summary)
+  - [Summary](#summary-1)
+  - [Repository & Live-Demo](#repository--live-demo)
 - [Sources](#sources)
+
+<div style="page-break-after: always;"></div>
 
 # Introduction
 Big Data, IoT, and analytics, and as a result, new methods of storing this fluid data have emerged. Almost all streaming data, particularly IoT data, but also real-time analytics and server and application monitoring, has a time stamp and thus is timeseries data. This project will go on to demonstrate the differences between traditional databases and NoSQL (time series) databases, why they are used, and how to build a project on top of them. The completed project stores, visualizes, and analyzes data using InfluxDB2, Python, and Grafana using time-stamped CSV data containing bird migration data as a time analytics approach.
@@ -35,36 +40,75 @@ Big Data, IoT, and analytics, and as a result, new methods of storing this fluid
 # Basics
 ## NoSQL basics
 NoSQL is a different approach to database design that excludes traditional relational database management systems. While relational database systems attempt to abstract the underlying data structure, NoSQL databases are more data-specific, which should make them more efficient for this specific data. They are intended to implement data structures in a manner that is more closely aligned with the target system, whereas traditional relational databases cannot be structured in this sort of way. The motivation for using NoSQL databases is that they do not require the use of a predefined schema, resulting in a simpler design, horizontal scaling, and greater control over data availability.
+Because NoSQL distributes its data, it must adhere to the CAP theorem, which states that only two of the three following attributes can be achieved: consistency, availability, and partition tolerance. Depending on the application to implement and the needs of the use cases, different databases prioritize consistency over availability, while others prioritize availability over consistency.
 
 CAP-Theorem https://cloudxlab.com/assessment/displayslide/345/nosql-cap-theorem#:~:text=NoSQL%20can%20not%20provide%20consistency,Consistency%2C%20Availability%20and%20Partition%20Tolerance.
 
 Brad Dayley: Sams Teach Yourself NoSQL with MongoDB in 24 Hours, Video Enhanced Edition
 
+Kasun Idrasiri: Design Patterns for Cloud Native Applications
 
 
-## NoSQL vs relational Databases
+
+
+## NoSQL vs Relational Databases
 NoSQL and relational databases both have the same basic goals: to store and retrieve data, as well as to coordinate changes. The distinction is that NoSQL databases abandon some of the capabilities of relational databases in order to increase scalability. NoSQL databases, in particular, typically have much simpler coordination capabilities than traditional relational systems, sometimes even none at all). NoSQL databases typically remove all or most of the SQL query language, as well as a complex optimizer required for SQL to be useful.
 The benefit of the tradeoff is that NoSQL databases are often very simple and can handle unstructured data, resulting in higher scalability in the best case. This has the disadvantage of losing overview by storing a large amount of unstructured and unformatted data, and optimization is in the hands of the developr rather than the optimizer when using relational databases.
+
 source: Time Series Databases: New Ways to Store and Access Data
 
-## TimeSeries databases
+## Time Series Databases
 A time series is a collection of values that are organized by time. For example, stock prices may fluctuate throughout the day as trades are executed, or a weather sensor may take atmospheric temperatures every minute. Time-series data are any events that are recorded over time, whether on a regular or sporadic basis. A time-series database is designed to facilitate the retrieval and statistical analysis of time-series data. While time-series data such as orders, shipments, logs, and so on have long been stored in relational databases, the data sizes and volumes were frequently insignificant. New special-purpose databases were required as data grew faster and larger. Time-series databases, among other things, address the needs of growing, high-velocity data volumes from IoT, event and application logs, ad tech, and fintech. These workloads are frequently write-intensive. As a result, memory buffering is frequently used in time-series databases to support fast writes and reads. Looking at the CAP Theorem, InfluxDB mostly focuses on
 
 https://cloudxlab.com/assessment/displayslide/345/nosql-cap-theorem#:~:text=NoSQL%20can%20not%20provide%20consistency,Consistency%2C%20Availability%20and%20Partition%20Tolerance.
 source: Fundamentals of Data Engineering: Plan and Build Robust Data Systems von Joe Reis (Author), Matt Housley (Author), (June 2022) O'REILLYs
 
-## Why use a time series data
-Time series date often needs to focus on fast
+## Why use a time series database
+It is necessary to consider the problems that timeseries databases attempt to solve. IoT devices and real-time analytics generate a large amount of data, and with the increasing amount of data produced with a time stamp, there must be a way to deal with this. Regular time series data, such as measurements taken every 10 seconds, and irregular data, such as API requests, are the two types of time series data. A modern time series database should be capable of handling both types of data. Timeseries databases are designed to deal with problems that arise with these high volume measurement data, and as a result, they solve three major characteristics with the data they use: exceptionally high volume, natural time order, and the entire set of data being more valuable than individual records. When these issues arise in the development of an application or system, it is recommended that a timeseries database is used. They concentrate on optimizing frequent writes, merging data, and constructing sums and averages in order to treat the data as a whole and store combined data beyond the retention period. They also provide optimized query languages for handling data based on the use case.
+Consider using a traditional SQL database to store time series data. In general, it is possible, but problems arise when a certain data threshold is reached. It is common in Time Series Databases to set a retention period so that data from a specific period is stored as a cumulation. Using the same logic in SQL, there will eventually have to be the same number of deletes as inserts, a use case that a traditional database system is not designed to handle well. It is also possible to shard a traditional database to scale across systems, but this requires more application code to be written. Time Series Databases and its libraries, such as InfluxDB and its python library, support this out of the box.
 
+
+Kovid Rathee 01.09.2021 https://towardsdatascience.com/the-case-for-using-timeseries-databases-c060a8afe727
 Paul Dix, "Why Build a Time Series Data Platform?", 20.07.2017 https://db-engines.com/en/blog_post/71
 
 ## InfluxDB basics
 According to https://db-engines.com/, InfluxDB is the most popular NoSQL time series data created by InfluxData. Its primary application is handling massive amounts of time-stamped data. Collecting IoT data is a common example because every data set in IoT is time-based. However, it is frequently used for Analytics as well as IoT data, for example, in this project time-stamped data for bird migration will be handled using InfluxDB2.
 The first version of InfluxDB came out in 2013 and the 1.x version is still commonly used. However, in 2020 InfluxDB was released as a stable version and is the way to go. It features a new query language, which will be explained in the next section, as well as a standalone binary with a graphical web interface to explore data.
 
+https://db-engines.com/en/system/InfluxDB
+https://www.influxdata.com/
+
 ### Flux Query Language
 
-## InfluxDB vs Timescale vs Prometheus
+InfluxDB includes a query language called Flux for querying, analyzing, and acting on data.
+Flux queries perform various operations, but in general, a query is constructed as follows:
+
+```sql
+from(bucket) 
+    |> range(start: x, stop: y) 
+    |> filteroptions
+```
+
+The pipe symbol `|>` marks pipe forward data and therefore every function or expression that follows after that symbol takes the former expression as an input.
+
+Typically, a bucket, which is a store for time series data in InfluxDB, will be chosen first to serve as a source. A time range is required for a flux query because queries without a time window are resource-intensive; therefore, it is up to the user to specify a common time-window that complements the data required. When only these fields are specified in the query, the result is an output table with a timestamp as the individual identifier key and the measurements. Following that, one can filter the data based on their requirements, such as after a field. There are also many built-in functions that can be used to reduce, sum up, interpret, or map data. This can be used to prepare the data for visualization or other purposes (e.g. classification, machine learning). As an example, consider the following query:
+
+```sql
+from(bucket: "bucket")
+    |> range(start: 2021-01-01T00:00:00Z, stop: 2021-01-01T12:00:00Z)
+    |> filter(fn: (r) => r._measurement == "location" and r._field == "lat" and r.lat == "lat")
+```
+
+https://docs.influxdata.com/influxdb/cloud/query-data/get-started/
+https://www.influxdata.com/blog/deep-dive-into-machine-learning-in-flux-naive-bayes-classification/
+https://github.com/RohanSreerama5/Naive-Bayes-Classifier-Flux
+
+
+### InfluxDB vs Timescale vs Prometheus
+
+### Classifiying Data in InfluxDB using Naive Bayes Classification
+
+https://github.com/RohanSreerama5/Naive-Bayes-Classifier-Flux/blob/master/Naive%20Bayes.pdf
 
 # Tutorial
 
@@ -390,5 +434,8 @@ python3 -m pip install influxdb
 ## Run sample project
 
 # Summary
+
+## Summary
+## Repository & Live-Demo
 
 # Sources
