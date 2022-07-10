@@ -1,6 +1,6 @@
-# Building and visualizing a NoSQL time series data store using InfluxDB, Python and Grafana
+# Building and visualizing a NoSQL time series data store using InfluxDB2, Python and Grafana
 
-- [Building and visualizing a NoSQL time series data store using InfluxDB, Python and Grafana](#building-and-visualizing-a-nosql-time-series-data-store-using-influxdb-python-and-grafana)
+- [Building and visualizing a NoSQL time series data store using InfluxDB2, Python and Grafana](#building-and-visualizing-a-nosql-time-series-data-store-using-influxdb2-python-and-grafana)
 - [Introduction](#introduction)
 - [Basics](#basics)
   - [NoSQL basics](#nosql-basics)
@@ -58,7 +58,7 @@ The benefit of the tradeoff is that NoSQL databases are often very simple and ca
 source: Time Series Databases: New Ways to Store and Access Data
 
 ## Time Series Databases
-A time series is a collection of values that are organized by time. For example, stock prices may fluctuate throughout the day as trades are executed, or a weather sensor may take atmospheric temperatures every minute. Time-series data are any events that are recorded over time, whether on a regular or sporadic basis. A time-series database is designed to facilitate the retrieval and statistical analysis of time-series data. While time-series data such as orders, shipments, logs, and so on have long been stored in relational databases, the data sizes and volumes were frequently insignificant. New special-purpose databases were required as data grew faster and larger. Time-series databases, among other things, address the needs of growing, high-velocity data volumes from IoT, event and application logs, ad tech, and fintech. These workloads are frequently write-intensive. As a result, memory buffering is frequently used in time-series databases to support fast writes and reads. Looking at the CAP Theorem, InfluxDB mostly focuses on
+A time series is a collection of values that are organized by time. For example, stock prices may fluctuate throughout the day as trades are executed, or a weather sensor may take atmospheric temperatures every minute. Time-series data are any events that are recorded over time, whether on a regular or sporadic basis. A time-series database is designed to facilitate the retrieval and statistical analysis of time-series data. While time-series data such as orders, shipments, logs, and so on have long been stored in relational databases, the data sizes and volumes were frequently insignificant. New special-purpose databases were required as data grew faster and larger. Time-series databases, among other things, address the needs of growing, high-velocity data volumes from IoT, event and application logs, ad tech, and fintech. These workloads are frequently write-intensive. As a result, memory buffering is frequently used in time-series databases to support fast writes and reads. Looking at the CAP Theorem, InfluxDB mostly focuses on CP or AP but tries to find a compromise between these two.
 
 https://cloudxlab.com/assessment/displayslide/345/nosql-cap-theorem#:~:text=NoSQL%20can%20not%20provide%20consistency,Consistency%2C%20Availability%20and%20Partition%20Tolerance.
 source: Fundamentals of Data Engineering: Plan and Build Robust Data Systems von Joe Reis (Author), Matt Housley (Author), (June 2022) O'REILLYs
@@ -86,7 +86,7 @@ Flux queries perform various operations, but in general, a query is constructed 
 ```sql
 from(bucket) 
     |> range(start: x, stop: y) 
-    |> filteroptions
+    |> #filteroptions
 ```
 
 The pipe symbol `|>` marks pipe forward data and therefore every function or expression that follows after that symbol takes the former expression as an input.
@@ -105,6 +105,29 @@ https://github.com/RohanSreerama5/Naive-Bayes-Classifier-Flux
 
 
 ### InfluxDB vs Timescale vs Prometheus
+
+Prometheus and TimescaleDB serve a similar purpose than InfluxDB by being time series databases. While InfluxDB is the most used time series database according to (https://db-engines.com/de/ranking/time+series+dbms, 10.07.2022, 18:06) the other two databases are very commonly used. The question that arises is why InfluxDB is not always used and how the other candidates differ. 
+
+Prometheus: 
+- Uses its own query language PromQL
+- More features for monitoring purposes
+- Less support for for real-time analytics or machine learning
+- Only milisecond timestapms vs InfluxDB's nanoseconds
+- Less resource usage
+
+TimescaleDB:
+- Based on PostgreSQL
+- Uses SQL as query language
+- Relational data model
+- Inferior performance to InfluxDB
+
+Applications running in the cloud infrastructure often use the vendor's own database. For AWS it is called Amazon Timestream, for Azure Azure Time Series Insights. They serve the 
+
+https://www.metricfire.com/blog/prometheus-vs-influxdb/
+
+https://db-engines.com/en/system/InfluxDB%3BPrometheus%3BTimescaleDB
+
+https://docs.umh.app/docs/concepts/timescaledb-vs-influxdb/
 
 ### Classifiying Data in InfluxDB using Naive Bayes Classification
 
