@@ -1,8 +1,25 @@
 # Building and visualizing a NoSQL time series data store using InfluxDB2, Python and Grafana
 
+<center>
+
+|             |                              |
+|-------------|------------------------------|
+| Author:     | Philipp Moritzer             |
+|             | 5034255                      |
+|             | pmoritzer@stud.hs-bremen.de  |
+|             |                              |
+| Supervisor: | Prof. Dr.-Ing. Uta Bohnebeck |
+|             | uta.bohnebeck@hs-bremen.de   |
+|             | Hochschule Bremen            |
+|             |                              |
+| Submission: | 31st July 2022               |
+</center>
+
 <div style="page-break-after: always;"></div>
 
+# Table of contents
 - [Building and visualizing a NoSQL time series data store using InfluxDB2, Python and Grafana](#building-and-visualizing-a-nosql-time-series-data-store-using-influxdb2-python-and-grafana)
+- [Table of contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Fundamentals](#fundamentals)
   - [NoSQL basics](#nosql-basics)
@@ -33,7 +50,6 @@
   - [Repository & Live-Demo](#repository--live-demo)
 - [Sources](#sources)
 
-<div style="page-break-after: always;"></div>
 
 # Introduction
 Big Data, IoT, and analytics, and as a result, new methods of storing this fluid data have emerged. Almost all streaming data, particularly IoT data, but also real-time analytics and server and application monitoring, has a time stamp and thus is time series data. This project will go on to demonstrate the differences between traditional databases and NoSQL (time series) databases, why they are used, and how to build a project on top of them. The completed project stores, visualizes, and analyzes data using InfluxDB2, Python, and Grafana using time-stamped CSV data containing bird migration data as a time analytics approach.
@@ -104,7 +120,7 @@ Applications running in the cloud infrastructure often use the vendor's own data
 ### Classifiying Data in InfluxDB using Naive Bayes Classification
 
 Based on the input, the Naive Bayes classification is described as a probabilistic classifier that should be able to predict a probability. It is based on the Bayes Theorem:
-$$P(A|B) = {P(A|B)\:P(A) \over P(B) }$$
+$$ P(A|B) = {P(A|B)\:P(A) \over P(B) } $$
 
 A distribution over a set of classes is calculated given an observation of an input. After that, the classifier can be trained to determine which class has the highest probability. Consider the the following:
 
@@ -112,7 +128,7 @@ $$ P(Class\:|\:Field) $$
 
 Given enough training data the probability can be predicted based on a given field. A simplified example would be that if a bird is in the northern hemisphere in the winter we could predict what kind of species the bird belongs to, e.g.:
 
-$$P("Northern"\:"Winter"\:|\:"Larus\:fuscus")$$
+$$ P("Northern"\:"Winter"\:|\:"Larus\:fuscus") $$
 
 In words, if a data point is in the northern stratosphere and it is winter we can predict with a certain probability that the bird is a *Larus fuscus*.
 This type of classification can be performed using the Flux query language.
@@ -246,7 +262,7 @@ Replace the ``INFLUX_TOKEN`` property to equal the generated API-Token from the 
 
 ### Setting up the application
 
-Create a file called ``main.py``in the project's root directory that will serve as an entrypoint for the client application. First we will do a simple output to check whether our application works.
+Create a file called ``main.py``in the project's root directory that will serve as an entrypoint for the client application. First we will do a simple output to check whether the application works.
 
 ```python
 print ("Hello World")
