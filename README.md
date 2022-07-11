@@ -145,7 +145,7 @@ client library provided by InfluxDB.
 
 ## The data - Movebank: Animal tracking
 
-The data processed in this example is 
+The data used in this example was obtained from the following location: https://www.kaggle.com/datasets/pulkit8595/movebank-animal-tracking (Accessed: 11.07.2022, 19:31) The data contains a set of measurements in which various birds were fitted with GPS-Sensors to determine their location using geodata. Each measurement includes an event identifier, a timestamp, a location (latitude and longitude), a local identifier, and study data. Some fields are left blank or share the same value on every record (visible, manually-marked-outlier, individual-taxon-identifier). The data set contains 89868 individual records tracking 49 Birds over a 7-year period (2009-2015).
 
 ## Prerequisites
 
@@ -166,9 +166,9 @@ $ docker-comopse --version
 ```
 
 ## Spinning up the composition
-###
+
 ### docker-compose
-There is no need to install InfluxDB or Grafana locally to quickly spin up the environment. Although it is possible to follow along using locally installed instances, docker-compose makes it easier to spin up the services. If no project root has yet been created, create a new folder for the project and add the following ``docker-compose.yml`` file:
+There is no need to install InfluxDB or Grafana locally to quickly spin up the environment. Although it is possible to follow along using locally installed or remotely hosted instances, docker-compose makes it easier to spin up the services. If no project root has yet been created, create a new folder for the project and add the following ``docker-compose.yml`` file:
 ```yaml
 version: "3.9"
 
@@ -317,7 +317,7 @@ This script builds our application into a Docker Image, creates a network and st
 $ ./run.sh
 # Output: Hello World
 ```
-Every time we want to start the application locally we can run the ``run.sh``script.
+Every time we want to start the application locally we can run the ``run.sh`` script.
 
 ### Implementing functionality
 
@@ -462,6 +462,12 @@ python3 -m pip install influxdb
 
 ## Summary
 ## Repository & Live-Demo
+
+Source Code Repository: https://github.com/philippmoritzer/bd-ml-project
+
+Grafana: https://grafana.philippmoritzer.com/
+
+InfluxDB: https://influx.philippmoritzer.com/
 
 # Sources
 - [1]   Brad Dayley. Sams Teach Yourself NoSQL with MongoDB in 24 Hours, Video Enhanced Edition. O'REILLY. 2014.
