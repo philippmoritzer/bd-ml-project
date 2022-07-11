@@ -26,7 +26,7 @@ def parse_row(row: OrderedDict):
         .field("individual-taxon-canonical-name", row['individual-taxon-canonical-name']) \
         .field("tag-local-identifier", row['tag-local-identifier']) \
         .field("individual-local-identifier", row['individual-local-identifier']) \
-        .time(row['timestamp'])               
+        .time(row['timestamp'])        
 
 data = rx \
     .from_iterable(DictReader(open('migration_original.csv', 'r'))) \

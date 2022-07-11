@@ -5,3 +5,5 @@ from(bucket: "bird-migration")
 |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
 
 |>  filter(fn: (r) => contains(value: r["individual-local-identifier"], set: ${localIdentifier:json}))
+
+
