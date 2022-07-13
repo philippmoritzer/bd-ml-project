@@ -51,4 +51,4 @@ with connect_to_influxdb(url, token, org) as client:
     result = client.query_api().query(query=query)
     print()
     print("=== results ===")
-    print()
+    print(result)

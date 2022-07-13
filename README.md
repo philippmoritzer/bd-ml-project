@@ -42,11 +42,13 @@
     - [Setting up the application](#setting-up-the-application)
     - [Implementing functionality](#implementing-functionality)
   - [Setting up Grafana](#setting-up-grafana)
+    - [Defining InfluxDB as a data source](#defining-influxdb-as-a-data-source)
   - [Python](#python)
   - [Grafana](#grafana)
   - [Run sample project](#run-sample-project)
 - [Summary](#summary)
   - [Summary](#summary-1)
+  - [Outlook](#outlook)
   - [Repository & Live-Demo](#repository--live-demo)
 - [Sources](#sources)
 
@@ -145,7 +147,7 @@ client library provided by InfluxDB.
 
 ## The data - Movebank: Animal tracking
 
-The data used in this example was obtained from the following location: https://www.kaggle.com/datasets/pulkit8595/movebank-animal-tracking (Accessed: 11.07.2022, 19:31) The data contains a set of measurements in which various birds were fitted with GPS-Sensors to determine their location using geodata. Each measurement includes an event identifier, a timestamp, a location (latitude and longitude), a local identifier, and study data. Some fields are left blank or share the same value on every record (visible, manually-marked-outlier, individual-taxon-identifier). The data set contains 89868 individual records tracking 49 Birds over a 7-year period (2009-2015).
+The data used in this example was obtained from the following location: https://www.kaggle.com/datasets/pulkit8595/movebank-animal-tracking (visited: 11.07.2022, 19:31) The data contains a set of measurements in which various birds were fitted with GPS-Sensors to determine their location using geodata. Each measurement includes an event identifier, a timestamp, a location (latitude and longitude), a local identifier, and study data. Some fields are left blank or share the same value on every record (visible, manually-marked-outlier, individual-taxon-identifier). The data set contains 89868 individual records tracking 49 Birds over a 7-year period (2009-2015).
 
 ## Prerequisites
 
@@ -213,8 +215,8 @@ Volumes are used by both InfluxDB and Grafana. The next step is to make sure tha
   docker-compose.yml
 ```
 
-Also a network is added in the ``docker-compose.yml`` file so our Python application is able to communicate with the services on the same network later on when using Docker.
-Docker-compose is used to spin up a local instance of InfluxDB and Grafana. To start both services, enter 
+Also a network is added in the ``docker-compose.yml`` file so the Python application is able to communicate with the services on the same network later on when using Docker.
+Docker-compose is used to spin up a local instance of InfluxDB and Grafana. To start both services, following command has to be entered: 
 
 ```bash
 docker-compose up
@@ -235,7 +237,7 @@ While Grafana uses Port 3000 for its web interface and should be reachable by ty
 
 ## Setting up InfluxDB
 
-To access the InfluxDB web interface, go to ``localhost:8086``. Press 'Get Started' to begin the setup procedure. The setup then asks for a login, password, organization name, and an initial bucket name in the next stage. The password for ``root`` is ``password``, and the initial organization name is my tag ``pmoritzer``. The bucket name must be set initially, but the bucket is not needed because our data processing unit python application will create a bucket dynamically in the future. The information should be saved because it will be required to log in to the web interface later on and the organization name will serve as an identifier in the client application.
+To access the InfluxDB web interface, ``localhost:8086`` has to be accessed. The 'Get Started' button has to be pressed to begin the setup procedure. The setup then asks for a login, password, organization name, and an initial bucket name in the next stage. The password for ``root`` is ``password``, and the initial organization name is my tag ``pmoritzer``. The bucket name must be set initially, but the bucket is not needed because the data processing unit python application will create a bucket dynamically in the future. The information should be saved because it will be required to log in to the web interface later on and the organization name will serve as an identifier in the client application.
 
 ![alt text](./docs/images/influxdb-setup/initial-account.png)*First setup step for InfluxDB*
 
@@ -262,7 +264,7 @@ Replace the ``INFLUX_TOKEN`` property to equal the generated API-Token from the 
 
 ### Setting up the application
 
-Create a file called ``main.py``in the project's root directory that will serve as an entrypoint for the client application. First we will do a simple output to check whether the application works.
+A file called ``main.py`` is created in the project's root directory that will serve as an entrypoint for the client application. First, a simple output is done to check whether the application works.
 
 ```python
 print ("Hello World")
@@ -273,7 +275,7 @@ $ python3 main.py
 # Output: Hello World
 ```
 
-For the dependencies a ``requirements.txt``file is created in the project's root directory with following content to install the python client library for InfluxDB using pip. To make sure they are locally available, run the follwing command:
+For the dependencies a ``requirements.txt``file is created in the project's root directory with following content to install the python client library for InfluxDB using pip. To make sure they are locally available, the following command has to be executed:
 
 
 ```properties
@@ -282,10 +284,9 @@ influxdb-client == 1.29.0
 
 ```bash
 $ pip3 install -r requirements.txt
-
 ```
 
-Next, we're going to dockerize the application. To do so, a Dockerfile will be created. Docker ensures that the application can run with the dependencies defined regardless of the system's environment.
+Next, the application is going to be dockerized. To do so, a `Dockerfile` will be created. Docker ensures that the application can run with the dependencies defined regardless of the system's environment.
 
 
 ```Dockerfile
@@ -311,17 +312,17 @@ $ docker network create project_network1
 $ docker run --network=project_network1 --env-file ./env/env.app influxdb-sample
 ```
 
-This script builds our application into a Docker Image, creates a network and starts the container while making sure it can communicate with the services on the same network, ``network1``.
+This script builds this application into a Docker Image, creates a network and starts the container while making sure it can communicate with the services on the same network, ``network1``.
 
 ```bash
 $ ./run.sh
 # Output: Hello World
 ```
-Every time we want to start the application locally we can run the ``run.sh`` script.
+Every time the the application needs to be started locally locally, the ``run.sh`` script can be run.
 
 ### Implementing functionality
 
-First a function for connecting to InfluxDB will be implemented. create a folder ``app/`` including a file ``connect_to_influx.py``. The content of the file will be as follows:
+First a function for connecting to InfluxDB will be implemented. A a folder ``app/`` is created including a file ``connect_to_influx.py``. The content of the file will be as follows:
 
 ```python
 import time
@@ -347,7 +348,7 @@ def connect_to_influxdb(url, token, org, retries=10, tried=0) -> InfluxDBClient:
 
 The file contains a function that returns an InfluxDBClient connection object. The method invokes the constructor with the required information (URL, API-Token, organisation). If the connection is successful and healthy, this custom wrapper method returns the InfluxDBClient object. If it is not, it tries to connect to the given InfluxDB instance as many times as specified. If it fails, the application will exit with a connection error.
 
-The application logic for writing our sample data to InfluxDB must now be implemented. First, we'll import the database connection function we just wrote, as well as any other imports required for this logic. Among these are the InfluxDB client library, csv for handling CSV data, and the ```rx``` functional programming library.
+The application logic for writing the bird-migration sample data to InfluxDB must now be implemented. First, the database connection function that was just implemented is imported, as well as any other imports required for this logic. Among these are the InfluxDB client library, csv for handling CSV data, and the ```rx``` functional programming library.
 
 ```python
 from app.connect_to_influx import connect_to_influxdb
@@ -359,7 +360,7 @@ from collections import OrderedDict
 from decimal import Decimal
 import os
 
-# rx for functional programming
+#import rx for functional programming
 import rx # functional programming library
 from rx import operators
 ```
@@ -372,7 +373,7 @@ token = os.environ['INFLUX_TOKEN'] or "<token>"
 org = os.environ['INFLUX_ORG'] or 'pmoritzer'
 ```
 
-Following that, a function will be defined to parse each row of the CSV containing the bird migration data. We will need the following fields for this analysis:
+Following that, a function will be defined to parse each row of the CSV containing the bird migration data. The following fields are used for this analysis:
 
 - timestamp
 - event-id
@@ -383,7 +384,7 @@ Following that, a function will be defined to parse each row of the CSV containi
 - tag-local-identifier
 - individual-local-identifier
 
-The remaining columns have little value for data analysis, so they are not considered in this project. The InfluxDB interface's Point-Object is returned by the following function. To create the dynamic data structure, we can use the provided Builder-Pattern. Each Point will later be stored as a dataset in an InfluxDB bucket.
+The remaining columns have little value for this data analysis, so they are not considered in this project. The InfluxDB interface's Point-Object is returned by the following function. To create the dynamic data structure, we can use the provided Builder-Pattern. Each Point will later be stored as a dataset in an InfluxDB bucket.
 
 ```python
 def parse_row(row: OrderedDict):   
@@ -435,21 +436,40 @@ with connect_to_influxdb(url, token, org) as client:
     result = client.query_api().query(query=query)
     print()
     print("=== results ===")
-    print()
+    print(result)
 ```
 
 The results will be validated by committing the following flux query using the Python code:
 
-```flux
+```sql
 from(bucket:"bird-migration") |> range(start: 0, stop: now())
 ```
 
-Using the InfluxDB web client, run the same flux query to see if the data is in our database.
+The same query can be run using the InfluxDB web client to see if the data is in the database. To do so, select the 'Data'-tab in the left sidebar and then the Buckets Tab in the resulting screen. The 'bird-migration' bucket can then be selected, and the Script Editor can be selected in the opening content window. After submitting the query, the raw data can be viewed in a table by selecting the 'Table' display.
+
+![alt text](./docs/images/influxdb-setup/test-select.png)*Viewing imported data*
 
 ## Setting up Grafana
 
+To setup Grafana, `localhost:3000` has to be accessed. A login can be performed with following credentials:
 
-python3 -m pip install influxdb
+ User: `admin`, password. `admin`
+ 
+ The creation of a new account can be skipped, or a new password can be set.
+
+### Defining InfluxDB as a data source
+
+The data source tab from the left side menu has to be selected:
+
+![alt text](./docs/images/grafana-setup/data-source-tab.png)*Grafana defining a data source*
+
+The blue 'Add data source' button next to the search bar must then be pressed. InfluxDB should be chosen from the list that appears. To register the previously installed InfluxDB data source, the following settings must be made:
+
+![alt text](./docs/images/grafana-setup/configure-influxdb-datasource.png)*Grafana defining a data source*
+
+The Query Language should be `Flux`, and the URL should be `http://influxdb:8086`, as defined by the docker compose DNS-Resolution. Basic authentication is used, with the username `root` and password `password`. In the final section, enter the organization name from the Influx-Setup, which is `pmoritzer` in this case, the root's API token, and the default bucket, which is `bird-migration` in this case. The 'Save & Test' button can be used to see if the connection works.
+
+![alt text](./docs/images/grafana-setup/grafana-connection-success.png)*Successful creation of InfluxDB data source*
 
 ## Python
 ## Grafana
@@ -461,6 +481,8 @@ python3 -m pip install influxdb
 # Summary
 
 ## Summary
+## Outlook
+- streaming data real-time
 ## Repository & Live-Demo
 
 Source Code Repository: https://github.com/philippmoritzer/bd-ml-project
