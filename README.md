@@ -43,13 +43,16 @@
     - [Implementing functionality](#implementing-functionality)
   - [Setting up Grafana](#setting-up-grafana)
     - [Defining InfluxDB as a data source](#defining-influxdb-as-a-data-source)
-  - [Python](#python)
-  - [Grafana](#grafana)
-  - [Run sample project](#run-sample-project)
+    - [Creating a dashboard](#creating-a-dashboard)
+  - [Visualizing and analyising the data](#visualizing-and-analyising-the-data)
+    - [Geomap & Heatmap](#geomap--heatmap)
+    - [Latitude over time](#latitude-over-time)
+    - [Classification](#classification)
 - [Summary](#summary)
   - [Summary](#summary-1)
   - [Outlook](#outlook)
-  - [Repository & Live-Demo](#repository--live-demo)
+  - [Repository and sample project](#repository-and-sample-project)
+  - [Demo](#demo)
 - [Sources](#sources)
 
 
@@ -453,7 +456,7 @@ The same query can be run using the InfluxDB web client to see if the data is in
 
 To setup Grafana, `localhost:3000` has to be accessed. A login can be performed with following credentials:
 
- User: `admin`, password. `admin`
+ User: `admin`, password: `admin`
  
  The creation of a new account can be skipped, or a new password can be set.
 
@@ -469,21 +472,32 @@ The blue 'Add data source' button next to the search bar must then be pressed. I
 
 The Query Language should be `Flux`, and the URL should be `http://influxdb:8086`, as defined by the docker compose DNS-Resolution. Basic authentication is used, with the username `root` and password `password`. In the final section, enter the organization name from the Influx-Setup, which is `pmoritzer` in this case, the root's API token, and the default bucket, which is `bird-migration` in this case. The 'Save & Test' button can be used to see if the connection works.
 
-![alt text](./docs/images/grafana-setup/grafana-connection-success.png)*Successful creation of InfluxDB data source*
+![alt text](./docs/images/grafana-setup/grafana-connection-success.png)*Grafana: successful creation of InfluxDB data source*
 
-## Python
-## Grafana
+### Creating a dashboard
+The data is then visualized using a dashboard, which is created in the following step. The Dashboard option in Grafana must be selected to create a dashboard, as shown in the screenshot below:
 
+![alt text](./docs/images/grafana-setup/dashboard-entry.png)*Grafana: Dashboard entry point*
 
+Then, by pressing 'New Dashboard,' a new dashboard should be created. In the next step, a new panel can be added to the new dashboard and used to visualize data.
 
-## Run sample project
+## Visualizing and analyising the data
+
+### Geomap & Heatmap
+
+### Latitude over time
+
+### Classification
 
 # Summary
-
 ## Summary
 ## Outlook
 - streaming data real-time
-## Repository & Live-Demo
+
+## Repository and sample project
+- go to github and look at this
+
+## Demo
 
 Source Code Repository: https://github.com/philippmoritzer/bd-ml-project
 
