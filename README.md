@@ -50,7 +50,7 @@
     - [Latitude over time](#latitude-over-time)
     - [Classification](#classification)
 - [Summary](#summary)
-  - [Summary](#summary-1)
+  - [Conclusion](#conclusion)
   - [Outlook](#outlook)
   - [Repository and sample project](#repository-and-sample-project)
   - [Demo](#demo)
@@ -487,7 +487,7 @@ Then, by pressing 'New Dashboard,' a new dashboard should be created. In the nex
 
 ### Dashboard variables
 
-The dataset contains 48 bird identifier which should be able to be filtered after. To make this availabe a dashboard variable is going to be created. The gear symbol in the upper right corner has to be selected and in the appearing window the 'Variables' tab in the left sidebar has to be accessed and a new variable created by clicking the 'New' button. The new variable should be called `localIdentifier` and from the type query. It is tried to filter individual identifier names from the whole data set to get one entry for each bird to distinguish between the birds as a variable. InfluxDB is queried by selecting the data source created earlier. In the text field follwoing query has to be entered:
+The dataset contains 48 bird identifiers that should be filterable. A dashboard variable will be created to make this available. The gear symbol in the upper right corner must be selected, and the 'Variables' tab in the left sidebar must be accessed and a new variable created by clicking the 'New' button in the resulting window. The new variable should be named `localIdentifier` and should be derived from the type query. It is attempted to filter individual identifier names from the entire data set in order to obtain one entry for each bird in order to distinguish the birds as a variable. InfluxDB is queried by selecting the previously created data source. The following query must be entered in the text field:
 
 ```sql
 from(bucket:"bird-migration")
@@ -501,11 +501,11 @@ from(bucket:"bird-migration")
 |> distinct(column: "_value")
 ```
 
-This Flux query selects all records and only keeps distinct identifiers. 'Multi-value' and 'Include All option' should be selected. The whole configuration should now look like follows:
+This Flux query selects all records and keeps only unique identifiers. The 'Multi-value' and 'Include All Option' options should be chosen. The overall configuration should now look like this:
 
 ![alt text](./docs/images/visualization/dashboard-variable.png)*Visualization: Creating a Dashboard variable*
 
-After the variable is being saved and returning to the panel to be edited or to the dashboard overview there is a dropdown menu in which . The queries have to be fitted accordingly which will happen when querying the data for the visualization in the next steps.
+After saving the variable and returning to the panel to be edited or the dashboard overview, variables can be selected from a dropdown menu. The queries must be fitted appropriately, which will occur when querying the data for visualization in the following steps.
 
 ![alt text](./docs/images/visualization/dashboard-variable-2.png)
 
@@ -513,20 +513,157 @@ After the variable is being saved and returning to the panel to be edited or to 
 
 ### Geomap & Heatmap
 
+The configuration steps are numbered in the screenshot below and will be explained further down. The goal of this visualization is to show the location of each bird on a Geomap using the dataset's latitude and longitude.
+
 ![alt text](./docs/images/visualization/geomap-1.png)
 
 *Geomap: Configuration steps*
 
-![alt text](./docs/images/visualization/geomap-2.png)
+- 1: GeoMap must be chosen from the dropdown menu. The panel's display should now be a map.
 
-*Geomap: Color Mapping Transform*
+- 2: The query is edited in the panel below. As a data source, InfluxDB should be selected as previously configured. It is critical to set the threshold to a larger data set for query options; in this example, it is set to the maximum value; otherwise, the query will not work for large time windows.
+
+- 3: Now, follwing Flux query should be created:
+
+  ```sql
+  from(bucket: "bird-migration")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r._measurement == "migration")
+  |> filter(fn: (r) => (r._field == "lat") or  (r._field == "lon") or (r._field == "individual-local-identifier"))  
+  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+
+  |> filter(fn: (r) => contains(value: r["individual-local-identifier"], set: ${localIdentifier:json}))
+  ```
+
+  This query selects the required location data using the `individual-local-identifier`, which the application can filter using the dashboard variables. Then, using `set: $localIdentifier:json`, it pivots the table to usable fields and filters after the dashboard variable currently selected, which is 'All' by default. The values for the ranges `v.timeRangeStart` and `v.timeRangeStop` come from the Grafana time window at the top of the panel.
+
+- 4: A name for the panel options can be entered. The latitude and longitude fields may need to be selected from the dropdown menu. The data should already be displayed on the map at this point, but because each bird is the same color, it is difficult to distinguish them.
+
+- 5&6: A new `B` query should be added. It is associating the bird's unique identifier with a specific color. Because time series are not well suited to key value mappings, a workaround is used by merging the tables using an unusual Flux query and integrating CSV-Values. For this purpose, a relational database or a KeyValue-based database may be preferable:
+
+  ```sql
+  import "csv"
+
+  identifier = from(bucket:"bird-migration")
+  |> range(start: 0, stop: now())  
+  |> filter(fn: (r) =>
+      r._measurement == "migration" and
+      r._field == "individual-local-identifier"
+    )
+  |> distinct(column: "_value") 
+  |> rename(columns: {_value: "identifier"}) 
+  |> findColumn(
+      fn: (key) => key._measurement == "migration",
+      column: "identifier",
+  ) 
+
+  csvData = "
+  id,color
+  0,#00fa9a
+  1,#dc143c
+  2,#00ffff
+  3,#00bfff
+  4,#f4a460
+  5,#9370db
+  6,#0000ff
+  7,#a020f0
+  8,#adff2f
+  9,#da70d6
+  10,#b0c4de
+  11,#ff00ff
+  12,#1e90ff
+  13,#f0e68c
+  14,#fa8072
+  15,#dda0dd
+  16,#ff1493
+  17,#afeeee
+  18,#98fb98
+  19,#7fffd4
+  20,#fafad2
+  21,#ff69b4
+  22,#ffb6c1
+  23,#fff015
+  24,#8fbc8f
+  25,#800800
+  26,#b03060
+  27,#d2b48c
+  28,#ff0000
+  29,#ffa500
+  30,#ffd700
+  31,#ffff00
+  32,#00ff00
+  33,#3cb371
+  34,#b8860b
+  35,#4682b4
+  36,#d2691e
+  37,#9acd32
+  38,#20b2aa
+  39,#00008b
+  40,#32cd32
+  41,#808080
+  42,#2f4f4f
+  43,#556b2f
+  44,#8b4513
+  45,#006400
+  46,#8b0000
+  47,#808000
+  48,#483d8b
+  "
+
+  colors = csv.from(
+      csv: csvData, mode: "raw"
+  )
+  |> map(fn: (r) => ({r with color: r["color"], tag: r["tag"], "unique-local-identifier": if int(v: r["id"]) < length(arr: identifier) then identifier[int(v: r["id"])] else "no color"}))
+  |> drop(columns: ["id"])
+  |> yield()
+  ```
+
+  A Transform can be added from the results of this query by clicking on the 'Transform' tab next to the 'Query' tab. It is necessary to include the transformation 'Config from query results.' Config query `B` should apply to `fields with name` and options `individual-local-identifier (base field name)`. The values for the field color should be `Use as: Value mappings / Color` and `Select: All Values`, while the values for the field `unique-local-identifier` should be `Use as: Value mappings / Value` and `Select: All Values`. By mapping each value to a color and coloring the data points in the map for each distinct `local-identifier`, each bird should be distinguishable on the map. The following screenshot shows the transformation in its entirety:
+
+  ![alt text](./docs/images/visualization/geomap-2.png)
+
+  *Geomap: Color Mapping Transform*
+
+A new panel is created for the heatmap. The query's data source is `— Dashboard --` because the same data as in the geomap is used. `Use results from panel: Geomap` should be selected from the dropdown menu. 'Heatmap' should now be applied to the layer options in 4. A heatmap is created by reusing data from the first panel's queries. The following is the configuration:
+
+![alt text](./docs/images/visualization/heatmap.png)
+
+*Heatmap*
+
+The visualization results should now look like this. Individual identifiers can be filtered in a specific time slot. The data ranges from 2009 to 2015, so a little experimenting can be done. Most birds, as expected, spend the summer in the northern hemisphere and migrate south in the winter. This phenomenon can be retraced by setting time values.
+
+![alt text](./docs/images/visualization/heatmap-geomap.png)
+
+*Results of the Geomap and Heatmap visualization*
 
 ### Latitude over time
+
+The latitude should then be visualized over time. Because birds migrate back and forth over the seasons, the expected data should be similar to a sine/cosine function.
+
+A new panel with two Flux-queries should be created. Instead of Geomap, choose 'Time Series' from the list. Everything on the right side can be customized to one's liking. Only the line interpolation is changed for this visualization to create a smoother curve. As the `A` query is used, the following query is used:
+
+```sql
+from(bucket: "bird-migration")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+|> filter(fn: (r) => r._measurement == "migration")
+|> filter(fn: (r) => (r._field == "lat") or (r._field == "individual-local-identifier"))  
+|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+|> filter(fn: (r) => contains(value: r["individual-local-identifier"], set: ${localIdentifier:json}))
+|> pivot(rowKey: ["_time"], columnKey: ["individual-local-identifier"], valueColumn: "lat")
+```
+
+Again the results can be filtered by time and the local identifier. For the color of the time series the same query and transform as before is used for `B`, it can just be copied over.
+
+The whole configuration and the result can be viewed in the following picture:
+
+![alt text](./docs/images/visualization/latitude-complete.png)
+
+*Results of the latitude over time visualization*
 
 ### Classification
 
 # Summary
-## Summary
+## Conclusion
 ## Outlook
 - streaming data real-time
 
