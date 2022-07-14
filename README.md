@@ -45,6 +45,7 @@
     - [Defining InfluxDB as a data source](#defining-influxdb-as-a-data-source)
     - [Creating a dashboard](#creating-a-dashboard)
   - [Visualizing and analyising the data](#visualizing-and-analyising-the-data)
+    - [Dashboard variables](#dashboard-variables)
     - [Geomap & Heatmap](#geomap--heatmap)
     - [Latitude over time](#latitude-over-time)
     - [Classification](#classification)
@@ -484,7 +485,41 @@ Then, by pressing 'New Dashboard,' a new dashboard should be created. In the nex
 
 ## Visualizing and analyising the data
 
+### Dashboard variables
+
+The dataset contains 48 bird identifier which should be able to be filtered after. To make this availabe a dashboard variable is going to be created. The gear symbol in the upper right corner has to be selected and in the appearing window the 'Variables' tab in the left sidebar has to be accessed and a new variable created by clicking the 'New' button. The new variable should be called `localIdentifier` and from the type query. It is tried to filter individual identifier names from the whole data set to get one entry for each bird to distinguish between the birds as a variable. InfluxDB is queried by selecting the data source created earlier. In the text field follwoing query has to be entered:
+
+```sql
+from(bucket:"bird-migration")
+  |> range(start: 0, stop: now())
+  |> filter(fn: (r) =>
+    r._measurement == "migration" and
+    r._field == "individual-local-identifier"
+  )
+
+|> keep(columns: ["_value"])
+|> distinct(column: "_value")
+```
+
+This Flux query selects all records and only keeps distinct identifiers. 'Multi-value' and 'Include All option' should be selected. The whole configuration should now look like follows:
+
+![alt text](./docs/images/visualization/dashboard-variable.png)*Visualization: Creating a Dashboard variable*
+
+After the variable is being saved and returning to the panel to be edited or to the dashboard overview there is a dropdown menu in which . The queries have to be fitted accordingly which will happen when querying the data for the visualization in the next steps.
+
+![alt text](./docs/images/visualization/dashboard-variable-2.png)
+
+*Visualization: Dashboard variable after successful querying*
+
 ### Geomap & Heatmap
+
+![alt text](./docs/images/visualization/geomap-1.png)
+
+*Geomap: Configuration steps*
+
+![alt text](./docs/images/visualization/geomap-2.png)
+
+*Geomap: Color Mapping Transform*
 
 ### Latitude over time
 
