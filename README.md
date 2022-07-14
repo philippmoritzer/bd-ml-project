@@ -618,7 +618,7 @@ The configuration steps are numbered in the screenshot below and will be explain
   |> yield()
   ```
 
-  A Transform can be added from the results of this query by clicking on the 'Transform' tab next to the 'Query' tab. It is necessary to include the transformation 'Config from query results.' Config query `B` should apply to `fields with name` and options `individual-local-identifier (base field name)`. The values for the field color should be `Use as: Value mappings / Color` and `Select: All Values`, while the values for the field `unique-local-identifier` should be `Use as: Value mappings / Value` and `Select: All Values`. By mapping each value to a color and coloring the data points in the map for each distinct `local-identifier`, each bird should be distinguishable on the map. The following screenshot shows the transformation in its entirety:
+  A Transform can be added from the results of this query by clicking on the 'Transform' tab next to the 'Query' tab. It is necessary to include the transformation 'Config from query results'. Config query `B` should apply to `fields with name` and options `individual-local-identifier (base field name)`. The values for the field color should be `Use as: Value mappings / Color` and `Select: All Values`, while the values for the field `unique-local-identifier` should be `Use as: Value mappings / Value` and `Select: All Values`. By mapping each value to a color and coloring the data points in the map for each distinct `local-identifier`, each bird should be distinguishable on the map. The following screenshot shows the transformation in its entirety:
 
   ![alt text](./docs/images/visualization/geomap-2.png)
 
@@ -661,6 +661,80 @@ The whole configuration and the result can be viewed in the following picture:
 *Results of the latitude over time visualization*
 
 ### Classification
+
+This classification's goal is to create a classification using Nave Bayes. The primary objective is to forecast the season based on training data.
+
+$$ P(location\:|\:season) $$
+
+ Pre-processing is required first. To make things clear, the time will be divided into four seasons (winter, spring, summer, and autumn), and the locations will be mapped to climate zones as follows:
+
+ | **Months**   | **Season**   |
+|--------------|-------------|
+| 12-02        | Winter      |
+| 03-05        | Spring      |
+| 06-08        | Summer      |
+| 09-11        | Autumn      |
+|              |             |
+| **Latitude** | **Location**   |
+| 60-90        | Cold        |
+| 40-60        | Mild        |
+| 23.5-40        | Subtropical |
+| 0-23.5         | Tropical    |
+
+(Taken from: https://content.meteoblue.com/en/meteoscool/general-climate-zones [visited: 14.07.2022, 22:40])
+
+The training data is then transferred to a binary table in the following manner:
+
+|          | winter | spring | summer | autumn |
+|----------|--------|--------|--------|--------|
+| tropical | 1      | 0      | 0      | 0      |
+| mild     | 0      | 1      | 0      | 0      |
+| cold     | 0      | 0      | 1      | 0      |
+| cold     | 0      | 1      | 0      | 0      |
+| tropical   | 1      | 0      | 0      | 0      |
+| cold     | 0      | 0      | 1      | 0      |
+| mild     | 0      | 0      | 0      | 1      |
+
+A new panel has to be created on the existing Grafana dashboard with a Table as visulization option and an InfluxDB as a data source. Following query will built the table displayed above:
+
+```sql
+import "date"
+
+from(bucket: "bird-migration")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+|> filter(fn: (r) => (r._field == "lat"))  
+|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+|> map(fn: (r) => ({    
+  _location:       
+    if r["lat"] >= 0 and r["lat"] < 23.5 then
+      "tropical"
+    else if r["lat"] >= 23.5 and r["lat"] < 40 then
+      "subtropical"
+    else if r["lat"] >= 40 and r["lat"] < 60 then
+      "mild"  
+    else
+      "cold",
+  winter: 
+    if date.month(t: r._time) == 12 or date.month(t: r._time) <= 2 then 
+      1 else 0,
+  spring: 
+    if date.month(t: r._time) >= 3 and date.month(t: r._time) <= 5 then 
+      1 else 0,
+  summer:
+    if date.month(t: r._time) >= 6 and date.month(t: r._time) <= 8 then 
+      1 else 0,
+  autumn:
+    if date.month(t: r._time) >= 9 and date.month(t: r._time) <= 11 then 
+      1 else 0,
+  }))
+```
+
+The data will be kept in this panel and a new panel will be created in the dashboard to create a probability table based on the Bayes' theorem. The table should now look like this:
+
+![alt text](./docs/images/classification/binary-table.png)
+
+*Binary table for classification*
+
 
 # Summary
 ## Conclusion
