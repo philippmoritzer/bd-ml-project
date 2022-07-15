@@ -133,11 +133,11 @@ A distribution over a set of classes is calculated given an observation of an in
 
 $$ P(Class\:|\:Field) $$
 
-Given enough training data the probability can be predicted based on a given field. A simplified example would be that if a bird is in the northern hemisphere in the winter we could predict what kind of species the bird belongs to, e.g.:
+Given enough training data the probability can be predicted based on a given field. A simplified example would be that if a bird is in the northern hemisphere in the winter we could predict which season of the year it, e.g.:
 
-$$ P("Northern"\:"Winter"\:|\:"Larus\:fuscus") $$
+$$ P(Winter | Tropes) = 0.7 $$
 
-In words, if a data point is in the northern stratosphere and it is winter we can predict with a certain probability that the bird is a *Larus fuscus*.
+In words, if a data point is in the tropes a prediction with a certain probability (e.g. 0.7) that the current season is winter can be made.
 This type of classification can be performed using the Flux query language.
 
 [11, 16, 17]
@@ -662,7 +662,7 @@ The whole configuration and the result can be viewed in the following picture:
 
 ### Classification
 
-This classification's goal is to create a classification using Nave Bayes. The primary objective is to forecast the season based on training data.
+This classification's goal is to create a classification using Naive Bayes. The primary objective is to forecast the season based on training data.
 
 $$ P(location\:|\:season) $$
 
@@ -734,6 +734,42 @@ The data will be kept in this panel and a new panel will be created in the dashb
 ![alt text](./docs/images/classification/binary-table.png)
 
 *Binary table for classification*
+
+Considering the Bayes theorem with following example, these assumptions can be made. The climate zone 'tropes' is choosen as a field and calculate the probability of it being winter (class). This is going to be done for every field.
+
+| **Result**              | **Formula**                                 |
+|-------------------------|---------------------------------------------|
+| P(winter\|tropes)       | (P(winter) * P(tropes\|winter)) / P(tropes) |
+| P(winter)               | winter_season_entries / all_entries         |
+| P(tropes)               | tropes_entries / all_entries                |
+| P(winter \| tropes)     | tropes_in_winter / winter_season_entries    |
+|                         |                                             |
+| **Example Data**        |                                             |
+| all_entries             | 50                                          |
+| winter_season_entries   | 17                                          |
+| tropes_entries          | 20                                          |
+| tropes_in_winter        | 18                                          |
+|                         |                                             |
+| **Example Calculation** |                                             |
+| P(winter)               | 17/50 = 0.34                                |
+| P(tropes)               | 20/50 = 0.4                                 |
+| P(tropes \| winter)     | 18/20 = 0.9                                 |
+| P(winter \| tropes)     | **(0.34 * 0.9) / 0.4 = 0.765 = 76.5%**      |
+
+Which means: If an entry is in the tropes, it can be said with a certainty of 76.5% that the current season is winter. This example will be transferred to every class-field combination to make sure a statement can be made about every entry and this will be the final Naive Bayes classifier.
+
+By extending the flux query in a new panel a probability table will that should look as follows:
+
+| Class  | Field  | p_class | p_field | p_field_class | Probability |
+|--------|--------|---------|---------|---------------|-------------|
+| winter | tropes | 0.34    | 0.4     | 0.9           | 0.765       |
+| winter | mild   | ..      | ..      | ..            | ..          |
+| ..     | ..     | ..      | ..      | ..            | ..          |
+| summer | cold   | ..      | ..      | ..            | ..          |
+
+
+
+
 
 
 # Summary
