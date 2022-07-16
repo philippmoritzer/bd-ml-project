@@ -1,4 +1,4 @@
-# Building and visualizing a NoSQL time series data store using InfluxDB2, Python and Grafana
+# Building, visualizing and classifying a NoSQL time series data store using InfluxDB2, Python and Grafana
 
 <center>
 
@@ -18,7 +18,7 @@
 <div style="page-break-after: always;"></div>
 
 # Table of contents
-- [Building and visualizing a NoSQL time series data store using InfluxDB2, Python and Grafana](#building-and-visualizing-a-nosql-time-series-data-store-using-influxdb2-python-and-grafana)
+- [Building, visualizing and classifying a NoSQL time series data store using InfluxDB2, Python and Grafana](#building-visualizing-and-classifying-a-nosql-time-series-data-store-using-influxdb2-python-and-grafana)
 - [Table of contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Fundamentals](#fundamentals)
@@ -58,7 +58,7 @@
 
 
 # Introduction
-Big Data, IoT, and analytics, and as a result, new methods of storing this fluid data have emerged. Almost all streaming data, particularly IoT data, but also real-time analytics and server and application monitoring, has a time stamp and thus is time series data. This project will go on to demonstrate the differences between traditional databases and NoSQL (time series) databases, why they are used, and how to build a project on top of them. The completed project stores, visualizes, and analyzes data using InfluxDB2, Python, and Grafana using time-stamped CSV data containing bird migration data as a time analytics approach.
+Big Data, IoT, and analytics, and as a result, new methods of storing this fluid data have emerged. Almost all streaming data, particularly IoT data, but also real-time analytics and server and application monitoring, has a time stamp and thus is time series data. This project will go on to demonstrate the differences between traditional databases and NoSQL (time series) databases, why they are used, and how to build a project on top of them. The completed project stores, visualizes, and classifies data using InfluxDB2, Python, and Grafana using time-stamped CSV data containing bird migration data as a time analytics approach.
 
 # Fundamentals
 ## NoSQL basics
@@ -743,7 +743,7 @@ Considering the Bayes theorem with following example, these assumptions can be m
 | P(winter\|tropes)       | (P(winter) * P(tropes\|winter)) / P(tropes) |
 | P(winter)               | winter_season_entries / all_entries         |
 | P(tropes)               | tropes_entries / all_entries                |
-| P(winter \| tropes)     | tropes_in_winter / winter_season_entries    |
+| P(tropes \| winter)     | tropes_in_winter / winter_season_entries    |
 |                         |                                             |
 | **Example Data**        |                                             |
 | all_entries             | 50                                          |
@@ -759,19 +759,15 @@ Considering the Bayes theorem with following example, these assumptions can be m
 
 Which means: If an entry is in the tropes, it can be said with a certainty of 76.5% that the current season is winter. This example will be transferred to every class-field combination to make sure a statement can be made about every entry and this will be the final Naive Bayes classifier.
 
-By extending the flux query in a new panel a probability table will that should look as follows:
+By extending the flux query in a new panel a probability table will that should contain all the values needed for the calculation.
+The following flux query will be run first to count the values and union them into a single table.
 
-| Class  | Field  | p_class | p_field | p_field_class | Probability |
-|--------|--------|---------|---------|---------------|-------------|
-| winter | tropes | 0.34    | 0.4     | 0.9           | 0.765       |
-| winter | mild   | ..      | ..      | ..            | ..          |
-| ..     | ..     | ..      | ..      | ..            | ..          |
-| summer | cold   | ..      | ..      | ..            | ..          |
+> Note: The query is pretty complex since the mapping is done manually in most part. A better preprocessing using Python or some more abstraction in Flux might make this easier. But it still outputs the right data for the classification problem.
 
-First following flux query will be executed to count the values and union them into one table:
 
 ```sql
 import "date"
+import "array"
 
 training_data = from(bucket: "bird-migration")
 |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
@@ -853,15 +849,138 @@ combined_4 = join(tables: {t1: combined_3, t2: tropical_entries}, on: ["tag"])
 combined_5 = join(tables: {t1: combined_4, t2: subtropical_entries}, on: ["tag"]) 
 combined_6 = join(tables: {t1: combined_5, t2: mild_entries}, on: ["tag"]) 
 combined_7 = join(tables: {t1: combined_6, t2: cold_entries}, on: ["tag"]) 
-count_entries = join(tables: {t1: combined_7, t2: all_entries}, on: ["tag"]) |> yield()
+count_entries = join(tables: {t1: combined_7, t2: all_entries}, on: ["tag"])
+
+rows = [
+  {_class: "winter", _field: "tropical"},
+  {_class: "winter", _field: "subtropical"},
+  {_class: "winter", _field: "mild"},
+  {_class: "winter", _field: "cold"},
+
+  {_class: "spring", _field: "tropical"},
+  {_class: "spring", _field: "subtropical"},
+  {_class: "spring", _field: "mild"},
+  {_class: "spring", _field: "cold"},
+
+  {_class: "summer", _field: "tropical"},
+  {_class: "summer", _field: "subtropical"},
+  {_class: "summer", _field: "mild"},
+  {_class: "summer", _field: "cold"},
+
+  {_class: "autumn", _field: "tropical"},
+  {_class: "autumn", _field: "subtropical"},
+  {_class: "autumn", _field: "mild"},
+  {_class: "autumn", _field: "cold"},
+]
+  
+class_field_mapping = array.from(rows: rows) 
+        |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+class_field_count_total = join(tables: {t1: count_entries, t2: class_field_mapping}, on: ["tag"]) 
+
+count_fields_by_class = (tables=<-, class) => tables
+    |> reduce(
+        identity: {
+            sum_cold: 0,
+            sum_mild: 0,
+            sum_subtropical: 0,
+            sum_tropical: 0,
+        },
+        fn: (r, accumulator) => ({
+          sum_tropical: if r["_season"] == class and r["tropical"] == 1 then accumulator.sum_tropical + 1 else accumulator.sum_tropical + 0,
+          sum_subtropical: if r["_season"] == class and r["subtropical"] == 1 then accumulator.sum_subtropical + 1 else accumulator.sum_subtropical + 0,
+          sum_mild: if r["_season"] == class and r["mild"] == 1 then accumulator.sum_mild + 1 else accumulator.sum_mild + 0,
+          sum_cold: if r["_season"] == class and r["cold"] == 1 then accumulator.sum_cold + 1 else accumulator.sum_cold + 0,
+        }),
+    )
+
+field_while_class_winter = training_data |> count_fields_by_class(class: "winter") |> set(key: "tag", value: "") |> group(columns: ["tag"])
+field_while_class_spring = training_data |> count_fields_by_class(class: "spring") |> set(key: "tag", value: "") |> group(columns: ["tag"])
+field_while_class_summer = training_data |> count_fields_by_class(class: "summer") |> set(key: "tag", value: "") |> group(columns: ["tag"])
+field_while_class_autumn = training_data |> count_fields_by_class(class: "autumn") |> set(key: "tag", value: "") |> group(columns: ["tag"])
+
+combined_field_class_1 = join(tables: {winter: field_while_class_winter, spring: field_while_class_spring}, on: ["tag"])
+combined_field_class_2 = join(tables: {t3: combined_field_class_1, summer: field_while_class_summer}, on: ["tag"])
+combined_field_class = join(tables: {summer: combined_field_class_2, autumn: field_while_class_autumn}, on: ["tag"]) 
+
+temp_combined_field_class_count_total = join(tables: {t1: class_field_count_total, t2: combined_field_class}, on: ["tag"]) 
+
+mapped_calc_values = temp_combined_field_class_count_total |> map(fn: (r) => ({
+    r with field_in_class_count: if r["_class"] == "winter" and r["_field"] == "tropical" then r["sum_tropical_winter"]
+    else if r["_class"] == "winter" and r["_field"] == "subtropical" then r["sum_subtropical_winter"]
+    else if r["_class"] == "winter" and r["_field"] == "mild" then r["sum_mild_winter"]
+    else if r["_class"] == "winter" and r["_field"] == "cold" then r["sum_cold_winter"]
+
+    else if r["_class"] == "spring" and r["_field"] == "tropical" then r["sum_tropical_spring"]
+    else if r["_class"] == "spring" and r["_field"] == "subtropical" then r["sum_subtropical_spring"]
+    else if r["_class"] == "spring" and r["_field"] == "mild" then r["sum_mild_spring"]
+    else if r["_class"] == "spring" and r["_field"] == "cold" then r["sum_cold_spring"]
+
+    else if r["_class"] == "summer" and r["_field"] == "tropical" then r["sum_tropical_summer"]
+    else if r["_class"] == "summer" and r["_field"] == "subtropical" then r["sum_subtropical_summer"]
+    else if r["_class"] == "summer" and r["_field"] == "mild" then r["sum_mild_summer"]
+    else if r["_class"] == "summer" and r["_field"] == "cold" then r["sum_cold_summer"]
+
+    else if r["_class"] == "autumn" and r["_field"] == "tropical" then r["sum_tropical_autumn"]
+    else if r["_class"] == "autumn" and r["_field"] == "subtropical" then r["sum_subtropical_autumn"]
+    else if r["_class"] == "autumn" and r["_field"] == "mild" then r["sum_mild_autumn"]
+    else if r["_class"] == "autumn" and r["_field"] == "cold" then r["sum_cold_autumn"]
+
+    else 0    
+})) |> drop(columns: ["sum_tropical_winter","sum_subtropical_winter","sum_mild_winter","sum_cold_winter","sum_tropical_spring","sum_subtropical_spring","sum_mild_spring","sum_cold_spring",
+"sum_tropical_summer","sum_subtropical_summer","sum_mild_summer","sum_cold_summer","sum_tropical_autumn","sum_subtropical_autumn","sum_mild_autumn","sum_cold_autumn"])
 ```
+
+Following the successful execution of this query, every value required for the calculation shown above is listed in the table below:
 
 ![alt text](./docs/images/classification/count-table.png)
 
 *Count table as intermediate step*
 
+To complete the described classifier, the final step is to calculate the table shown below.
 
+| Class  | Field  | p_class | p_field | p_field_class | Probability |
+|--------|--------|---------|---------|---------------|-------------|
+| winter | tropes | 0.34    | 0.4     | 0.9           | 0.765       |
+| winter | mild   | ..      | ..      | ..            | ..          |
+| ..     | ..     | ..      | ..      | ..            | ..          |
+| summer | cold   | ..      | ..      | ..            | ..          |
 
+By creating a new panel and adding these lines to the existing flux query the table should be calculated correctly:
+
+```sql
+mapped_calc_values |> map(fn: (r) => ({_class: r["_class"], _field: r["_field"],
+p_class: 
+  if r["_class"] == "winter" then float(v: r["winter_season_entries"])/float(v: r["all_entries"])
+  else if r["_class"] == "spring" then float(v: r["spring_season_entries"])/float(v: r["all_entries"])
+  else if r["_class"] == "summer" then float(v: r["summer_season_entries"])/float(v: r["all_entries"])
+  else if r["_class"] == "autumn" then float(v: r["autumn_season_entries"])/float(v: r["all_entries"])
+  else 0.0,
+p_field:
+  if r["_field"] == "tropical" then float(v: r["tropical_entries"])/float(v: r["all_entries"])
+  else if r["_field"] == "subtropical" then float(v: r["subtropical_entries"])/float(v: r["all_entries"])
+  else if r["_field"] == "mild" then float(v: r["mild_entries"])/float(v: r["all_entries"])
+  else if r["_field"] == "cold" then float(v: r["cold_entries"])/float(v: r["all_entries"])
+  else 0.0,
+p_field_class: 
+  if r["_class"] == "winter" then float(v: r["field_in_class_count"])/float(v: r["winter_season_entries"])
+  else if r["_class"] == "spring" then float(v: r["field_in_class_count"])/float(v: r["spring_season_entries"])
+  else if r["_class"] == "summer" then float(v: r["field_in_class_count"])/float(v: r["summer_season_entries"])
+  else if r["_class"] == "autumn" then float(v: r["field_in_class_count"])/float(v: r["autumn_season_entries"])
+  else 0.0,
+}))
+|> map(fn: (r) => ({r with probability: (r["p_class"]*r["p_field_class"]) / r["p_field"] }))
+```
+
+And the resulting trained classifier should be created and displayed in a table:
+
+![alt text](./docs/images/classification/trained-classifier.png)
+
+*Count table as intermediate step*
+
+Using the location of birds as a value, this type of classifier can predict which season is currently in effect with a degree of precision. Interesting data points include the fact that if a bird is in the cold zone of the earth, the current season is winter 70% of the time. There are no birds in the cold zone during the winter, so it is certain that if a bird is in the cold zone, it is not winter. Another expected result is that if a bird is in a tropical zone, it is most likely winter, but this can only be said with a certainty of 34.1 percent; rather, if a bird is in a subtropical zone, it is more likely to be winter with a certainty of 37.9 percent. The problem may be that the climate zones are not fine-grained enough for categorizing the position of the birds, particularly between the subtropicals and the tropicals.
+ 
 
 # Summary
 ## Conclusion
