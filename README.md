@@ -984,19 +984,45 @@ Using the location of birds as a value, this type of classifier can predict whic
 
 # Summary
 ## Conclusion
+InfluxDB is an excellent tool for dealing with large datasets of time series data. It is suitable for real-time analytics when combined with its Python library. The query language Flux is capable of performing extensive data analytics, as demonstrated by classification and visualization.
+
 ## Outlook
-- streaming data real-time
+This project takes a predefined dataset and processes it to InfluxDB in batches. Even though the queries would still work when streaming data, this project has not tested them. It could be an interesting approach to real-time analytics using InfluxDB and streaming data. Streaming IoT data from sensors to an Influx instance or even a distributed InfluxDB instance could be another interesting approach.
 
 ## Repository and sample project
-- go to github and look at this
+The whole source code can be found under the following GitHub repository: 
+
+Source Code Repository: https://github.com/philippmoritzer/bd-ml-project
+
+If some step does not work or the project just wants to be tried, the project can be just checked out using git. After running `docker-compose up`, InfluxDB should be spun up on `localhost:8086` and Grafana sould be accessible on `localhost:3000`.
+
+```properties
+#Login InfluxDB
+user=root
+password=password
+
+#Login Grafana
+user=admin
+password=admin
+```
 
 ## Demo
 
-Source Code Repository: https://github.com/philippmoritzer/bd-ml-project
+The whole project is hosted here:
 
 Grafana: https://grafana.philippmoritzer.com/
 
 InfluxDB: https://influx.philippmoritzer.com/
+
+```properties
+#Login InfluxDB
+user=root
+password=bd-ml-2022
+
+#Login Grafana
+user=admin
+password=bd-ml-2022
+```
 
 # Sources
 - [1]   Brad Dayley. Sams Teach Yourself NoSQL with MongoDB in 24 Hours, Video Enhanced Edition. O'REILLY. 2014.
