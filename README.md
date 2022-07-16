@@ -664,7 +664,7 @@ The whole configuration and the result can be viewed in the following picture:
 
 This classification's goal is to create a classification using Naive Bayes. The primary objective is to forecast the season based on training data.
 
-$$ P(location\:|\:season) $$
+$$ P(season | location) $$
 
  Pre-processing is required first. To make things clear, the time will be divided into four seasons (winter, spring, summer, and autumn), and the locations will be mapped to climate zones as follows:
 
@@ -685,15 +685,15 @@ $$ P(location\:|\:season) $$
 
 The training data is then transferred to a binary table in the following manner:
 
-|          | winter | spring | summer | autumn |
+|          | tropical | subtropical | mild | cold |
 |----------|--------|--------|--------|--------|
-| tropical | 1      | 0      | 0      | 0      |
-| mild     | 0      | 1      | 0      | 0      |
-| cold     | 0      | 0      | 1      | 0      |
-| cold     | 0      | 1      | 0      | 0      |
-| tropical   | 1      | 0      | 0      | 0      |
-| cold     | 0      | 0      | 1      | 0      |
-| mild     | 0      | 0      | 0      | 1      |
+| winter    | 1      | 0      | 0      | 0      |
+| summer     | 0      | 1      | 0      | 1      |
+| autumn     | 0      | 0      | 1      | 0      |
+| autumn     | 0      | 1      | 0      | 0      |
+| winter      | 1      | 0      | 0      | 0      |
+| summer     | 0      | 0      | 1      | 0      |
+| spring     | 0      | 1      | 0      | 0      |
 
 A new panel has to be created on the existing Grafana dashboard with a Table as visulization option and an InfluxDB as a data source. Following query will built the table displayed above:
 
@@ -704,29 +704,30 @@ from(bucket: "bird-migration")
 |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
 |> filter(fn: (r) => (r._field == "lat"))  
 |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
-|> map(fn: (r) => ({    
-  _location:       
+|> map(fn: (r) => ({
+  tropical:       
     if r["lat"] >= 0 and r["lat"] < 23.5 then
-      "tropical"
-    else if r["lat"] >= 23.5 and r["lat"] < 40 then
-      "subtropical"
-    else if r["lat"] >= 40 and r["lat"] < 60 then
-      "mild"  
-    else
-      "cold",
-  winter: 
+      1 else 0,
+  subtropical:
+    if r["lat"] >= 23.5 and r["lat"] < 40 then
+      1 else 0,
+  mild:
+    if r["lat"] >= 40 and r["lat"] < 60 then
+      1 else 0,
+  cold:
+    if r["lat"] >= 40 and r["lat"] >= 60 then
+      1 else 0,
+  _season: 
     if date.month(t: r._time) == 12 or date.month(t: r._time) <= 2 then 
-      1 else 0,
-  spring: 
-    if date.month(t: r._time) >= 3 and date.month(t: r._time) <= 5 then 
-      1 else 0,
-  summer:
-    if date.month(t: r._time) >= 6 and date.month(t: r._time) <= 8 then 
-      1 else 0,
-  autumn:
-    if date.month(t: r._time) >= 9 and date.month(t: r._time) <= 11 then 
-      1 else 0,
+      "winter"
+    else if date.month(t: r._time) >= 3 and date.month(t: r._time) <= 5 then 
+      "spring"
+    else if date.month(t: r._time) >= 6 and date.month(t: r._time) <= 8 then 
+      "summer"
+    else 
+      "autumn"
   }))
+
 ```
 
 The data will be kept in this panel and a new panel will be created in the dashboard to create a probability table based on the Bayes' theorem. The table should now look like this:
@@ -767,7 +768,97 @@ By extending the flux query in a new panel a probability table will that should 
 | ..     | ..     | ..      | ..      | ..            | ..          |
 | summer | cold   | ..      | ..      | ..            | ..          |
 
+First following flux query will be executed to count the values and union them into one table:
 
+```sql
+import "date"
+
+training_data = from(bucket: "bird-migration")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+|> filter(fn: (r) => (r._field == "lat"))  
+|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+|> map(fn: (r) => ({
+  tropical:       
+    if r["lat"] >= 0 and r["lat"] < 23.5 then
+      1 else 0,
+  subtropical:
+    if r["lat"] >= 23.5 and r["lat"] < 40 then
+      1 else 0,
+  mild:
+    if r["lat"] >= 40 and r["lat"] < 60 then
+      1 else 0,
+  cold:
+    if r["lat"] >= 40 and r["lat"] >= 60 then
+      1 else 0,
+  _season: 
+    if date.month(t: r._time) == 12 or date.month(t: r._time) <= 2 then 
+      "winter"
+    else if date.month(t: r._time) >= 3 and date.month(t: r._time) <= 5 then 
+      "spring"
+    else if date.month(t: r._time) >= 6 and date.month(t: r._time) <= 8 then 
+      "summer"
+    else 
+      "autumn"
+  }))
+
+all_entries = training_data |> reduce(
+        fn: (r, accumulator) => ({all_entries: accumulator.all_entries + 1 }),
+        identity: {all_entries: 0}, 
+    ) |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+winter_season_entries = training_data |> reduce(
+        fn: (r, accumulator) => ({winter_season_entries: if r["_season"] == "winter" then accumulator.winter_season_entries + 1 else accumulator.winter_season_entries + 0 }),
+        identity: {winter_season_entries: 0}, 
+    ) |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+spring_season_entries = training_data |> reduce(
+        fn: (r, accumulator) => ({spring_season_entries: if r["_season"] == "spring" then accumulator.spring_season_entries + 1 else accumulator.spring_season_entries + 0 }),
+        identity: {spring_season_entries: 0}, 
+    ) |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+summer_season_entries = training_data |> reduce(
+        fn: (r, accumulator) => ({summer_season_entries: if r["_season"] == "summer" then accumulator.summer_season_entries + 1 else accumulator.summer_season_entries + 0 }),
+        identity: {summer_season_entries: 0}, 
+    ) |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+autumn_season_entries = training_data |> reduce(
+        fn: (r, accumulator) => ({autumn_season_entries: if r["_season"] == "autumn" then accumulator.autumn_season_entries + 1 else accumulator.autumn_season_entries + 0 }),
+        identity: {autumn_season_entries: 0}, 
+    ) |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+tropical_entries = training_data |> reduce(fn: (r, accumulator) => ({tropical_entries: r["tropical"] + accumulator.tropical_entries}), identity: {tropical_entries: 0})
+        |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+subtropical_entries = training_data |> reduce(fn: (r, accumulator) => ({subtropical_entries: r["subtropical"] + accumulator.subtropical_entries}), identity: {subtropical_entries: 0})
+        |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+mild_entries = training_data |> reduce(fn: (r, accumulator) => ({mild_entries: r["mild"] + accumulator.mild_entries}), identity: {mild_entries: 0})
+        |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+cold_entries = training_data |> reduce(fn: (r, accumulator) => ({cold_entries: r["cold"] + accumulator.cold_entries}), identity: {cold_entries: 0})
+        |> set(key: "tag", value: "")
+        |> group(columns: ["tag"])
+
+combined_1 = join(tables: {t1: winter_season_entries, t2: spring_season_entries}, on: ["tag"])
+combined_2 = join(tables: {t1: combined_1, t2: summer_season_entries}, on: ["tag"])
+combined_3 = join(tables: {t1: combined_2, t2: autumn_season_entries}, on: ["tag"]) 
+combined_4 = join(tables: {t1: combined_3, t2: tropical_entries}, on: ["tag"]) 
+combined_5 = join(tables: {t1: combined_4, t2: subtropical_entries}, on: ["tag"]) 
+combined_6 = join(tables: {t1: combined_5, t2: mild_entries}, on: ["tag"]) 
+combined_7 = join(tables: {t1: combined_6, t2: cold_entries}, on: ["tag"]) 
+count_entries = join(tables: {t1: combined_7, t2: all_entries}, on: ["tag"]) |> yield()
+```
+
+![alt text](./docs/images/classification/count-table.png)
+
+*Count table as intermediate step*
 
 
 
