@@ -128,15 +128,15 @@ Applications running in the cloud infrastructure often use the vendor's own data
 
 Based on the input, the Naive Bayes classification is described as a probabilistic classifier that should be able to predict a probability. It is based on the Bayes Theorem:
 
-$$ P(A|B) = {P(A|B)*P(A) \over P(B) } $$
+<img src="./docs/images/classification/naive-bayes-1.png" alt="drawing" width="200"/>
 
 A distribution over a set of classes is calculated given an observation of an input. After that, the classifier can be trained to determine which class has the highest probability. Consider the the following:
 
-$$ P(Class\:|\:Field) $$
+<img src="./docs/images/classification/naive-bayes-2.png" alt="drawing" width="200"/>
 
 Given enough training data the probability can be predicted based on a given field. A simplified example would be that if a bird is in the northern hemisphere in the winter we could predict which season of the year it, e.g.:
 
-$$ P(Winter | Tropes) = 0.7 $$
+<img src="./docs/images/classification/naive-bayes-3.png" alt="drawing" width="200"/>
 
 In words, if a data point is in the tropes a prediction with a certain probability (e.g. 0.7) that the season is winter can be made.
 This type of classification can be performed using the Flux query language.
@@ -233,7 +233,8 @@ docker-compose up
 The InfluxDB exposed the Port 8086 for the web interface and should now be reachable locally on ``http://localhost:8086/``:
 
 InfluxDB on localhost:8086
-![alt text](./docs/images/docker-compose-setup/influx-welcome.png "Influx running on localhost:8086")
+
+![alt text](./docs/images/docker-compose-setup/influx-welcome.png "Influx running on localhost:8086") 
 
 While Grafana uses Port 3000 for its web interface and should be reachable by typint ``http://localhost:3000`` in a browser:
 
