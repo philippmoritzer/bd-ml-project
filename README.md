@@ -128,7 +128,7 @@ Applications running in the cloud infrastructure often use the vendor's own data
 
 Based on the input, the Naive Bayes classification is described as a probabilistic classifier that should be able to predict a probability. It is based on the Bayes Theorem:
 
-$$ P(A|B) = {P(A|B)\P(A) \over P(B) } $$
+$$ P(A|B) = {P(A|B)*P(A) \over P(B) } $$
 
 A distribution over a set of classes is calculated given an observation of an input. After that, the classifier can be trained to determine which class has the highest probability. Consider the the following:
 
