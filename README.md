@@ -29,7 +29,7 @@
   - [InfluxDB basics](#influxdb-basics)
     - [Flux Query Language](#flux-query-language)
     - [InfluxDB vs Timescale vs Prometheus](#influxdb-vs-timescale-vs-prometheus)
-    - [Classifiying Data in InfluxDB using Naive Bayes Classification](#classifiying-data-in-influxdb-using-naive-bayes-classification)
+  - [Naive Bayes Classification](#naive-bayes-classification)
 - [Tutorial](#tutorial)
   - [Goals](#goals)
   - [The data - Movebank: Animal tracking](#the-data---movebank-animal-tracking)
@@ -50,6 +50,7 @@
     - [Latitude over time](#latitude-over-time)
     - [Classification](#classification)
 - [Summary](#summary)
+  - [Result](#result)
   - [Conclusion](#conclusion)
   - [Outlook](#outlook)
   - [Repository and sample project](#repository-and-sample-project)
@@ -77,7 +78,7 @@ It is necessary to consider the problems that time series databases attempt to s
 Consider using a traditional SQL database to store time series data. In general, it is possible, but problems arise when a certain data threshold is reached. It is common in time series databases to set a retention period so that data from a specific period is stored as a cumulation. Using the same logic in SQL, there will eventually have to be the same number of deletes as inserts, a use case that a traditional database system is not designed to handle well. It is also possible to shard a traditional database to scale across systems, but this requires more application code to be written. Time series databases and its libraries, such as InfluxDB and its python library, support this out of the box. [8]
 
 ## InfluxDB basics
-According to https://db-engines.com/, InfluxDB is the most popular NoSQL time series data created by InfluxData. Its primary application is handling massive amounts of time-stamped data. Collecting IoT data is a common example because every data set in IoT is time-based. However, it is frequently used for Analytics as well as IoT data, for example, in this project time-stamped data for bird migration will be handled using InfluxDB2.
+According to https://db-engines.com/, InfluxDB is the most popular NoSQL time series database created by InfluxData. Its primary application is handling massive amounts of time-stamped data. Collecting IoT data is a common example because every data set in IoT is time-based. However, it is frequently used for analytics as well as IoT data, for example, in this project time-stamped data for bird migration will be handled using InfluxDB2.
 The first version of InfluxDB came out in 2013 and the 1.x version is still commonly used. However, in 2020 InfluxDB was released as a stable version and is the way to go. It features a new query language, which will be explained in the next section, as well as a standalone binary with a graphical web interface to explore data. [9, 10]
 
 ### Flux Query Language
@@ -111,7 +112,7 @@ Prometheus and TimescaleDB serve a similar purpose than InfluxDB by being time s
 Prometheus: 
 - Uses its own query language PromQL
 - More features for monitoring purposes
-- Less support for for real-time analytics or machine learning
+- Less support for real-time analytics or machine learning
 - Only milisecond timestamps vs InfluxDB's nanoseconds
 - Less resource usage
 
@@ -123,11 +124,11 @@ TimescaleDB:
 
 Applications running in the cloud infrastructure often use the vendor's own database. For AWS it is called Amazon Timestream, for Azure Azure Time Series Insights. They are in these type of compositions because it centralises the management to the vendor infrastructure. [13, 14, 15]
 
-### Classifiying Data in InfluxDB using Naive Bayes Classification
+## Naive Bayes Classification
 
 Based on the input, the Naive Bayes classification is described as a probabilistic classifier that should be able to predict a probability. It is based on the Bayes Theorem:
 
-$$ P(A|B) = {P(A|B)\:P(A) \over P(B) } $$
+$$ P(A|B) = {P(A|B)\P(A) \over P(B) } $$
 
 A distribution over a set of classes is calculated given an observation of an input. After that, the classifier can be trained to determine which class has the highest probability. Consider the the following:
 
@@ -137,7 +138,7 @@ Given enough training data the probability can be predicted based on a given fie
 
 $$ P(Winter | Tropes) = 0.7 $$
 
-In words, if a data point is in the tropes a prediction with a certain probability (e.g. 0.7) that the current season is winter can be made.
+In words, if a data point is in the tropes a prediction with a certain probability (e.g. 0.7) that the season is winter can be made.
 This type of classification can be performed using the Flux query language.
 
 [11, 16, 17]
@@ -148,7 +149,7 @@ This type of classification can be performed using the Flux query language.
 ## Goals
 The purpose of this project is to process a large amount of time series data. The data is stored using a NoSQL approach with InfluxDB. A Grafana Dashboard is constructed to visualize the data, and appropriate visualisation tools are employed. The data will be parsed using
 Python and processed to InfluxDB using functional programming in combination with the Python
-client library provided by InfluxDB.
+client library provided by InfluxDB. Using Flux a classification will be done on the existing dataset.
 
 ## The data - Movebank: Animal tracking
 
@@ -757,7 +758,7 @@ Considering the Bayes theorem with following example, these assumptions can be m
 | P(tropes \| winter)     | 18/20 = 0.9                                 |
 | P(winter \| tropes)     | **(0.34 * 0.9) / 0.4 = 0.765 = 76.5%**      |
 
-Which means: If an entry is in the tropes, it can be said with a certainty of 76.5% that the current season is winter. This example will be transferred to every class-field combination to make sure a statement can be made about every entry and this will be the final Naive Bayes classifier.
+Which means: If an entry is in the tropes, it can be said with a certainty of 76.5% that the season is winter. This example will be transferred to every class-field combination to make sure a statement can be made about every entry and this will be the final Naive Bayes classifier.
 
 By extending the flux query in a new panel a probability table will that should contain all the values needed for the calculation.
 The following flux query will be run first to count the values and union them into a single table.
@@ -979,10 +980,18 @@ And the resulting trained classifier should be created and displayed in a table:
 
 *Count table as intermediate step*
 
-Using the location of birds as a value, this type of classifier can predict which season is currently in effect with a degree of precision. Interesting data points include the fact that if a bird is in the cold zone of the earth, the current season is winter 70% of the time. There are no birds in the cold zone during the winter, so it is certain that if a bird is in the cold zone, it is not winter. Another expected result is that if a bird is in a tropical zone, it is most likely winter, but this can only be said with a certainty of 34.1 percent; rather, if a bird is in a subtropical zone, it is more likely to be winter with a certainty of 37.9 percent. The problem may be that the climate zones are not fine-grained enough for categorizing the position of the birds, particularly between the subtropicals and the tropicals.
+Using the location of birds as a value, this type of classifier can predict which season is in effect with a degree of precision. Interesting data points include the fact that if a bird is in the cold zone of the earth, the current season is winter 70% of the time. There are no birds in the cold zone during the winter, so it is certain that if a bird is in the cold zone, it is not winter. Another expected result is that if a bird is in a tropical zone, it is most likely winter, but this can only be said with a certainty of 34.1 percent; rather, if a bird is in a subtropical zone, it is more likely to be winter with a certainty of 37.9 percent. The problem may be that the climate zones are not fine-grained enough for categorizing the position of the birds, particularly between the subtropicals and the tropicals.
+This classifier takes the whole dataset as training data. By changing the time window it is possible to change the dataset and therefore to get a differently trained classifier.
  
 
 # Summary
+## Result
+The final dashboard should look as follows:
+
+![alt text](./docs/images/visualization/full-dashboard.png)
+
+*Count table as intermediate step*
+
 ## Conclusion
 InfluxDB is an excellent tool for dealing with large datasets of time series data. It is suitable for real-time analytics when combined with its Python library. The query language Flux is capable of performing extensive data analytics, as demonstrated by classification and visualization.
 
