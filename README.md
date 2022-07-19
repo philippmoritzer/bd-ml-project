@@ -749,17 +749,17 @@ Considering the Bayes theorem with following example, these assumptions can be m
 |                         |                                             |
 | **Example Data**        |                                             |
 | all_entries             | 50                                          |
-| winter_season_entries   | 17                                          |
+| winter_season_entries   | 21                                          |
 | tropes_entries          | 20                                          |
 | tropes_in_winter        | 18                                          |
 |                         |                                             |
 | **Example Calculation** |                                             |
-| P(winter)               | 17/50 = 0.34                                |
+| P(winter)               | 21/50 = 0.42                                |
 | P(tropes)               | 20/50 = 0.4                                 |
 | P(tropes \| winter)     | 18/20 = 0.9                                 |
-| P(winter \| tropes)     | **(0.34 * 0.9) / 0.4 = 0.765 = 76.5%**      |
+| P(winter \| tropes)     | **(0.42 * 0.9) / 0.4 = 0.945 = 94.5%**      |
 
-Which means: If an entry is in the tropes, it can be said with a certainty of 76.5% that the season is winter. This example will be transferred to every class-field combination to make sure a statement can be made about every entry and this will be the final Naive Bayes classifier.
+Which means: If an entry is in the tropes, it can be said with a certainty of 94.5% that the season is winter. This example will be transferred to every class-field combination to make sure a statement can be made about every entry and this will be the final Naive Bayes classifier.
 
 By extending the flux query in a new panel a probability table will that should contain all the values needed for the calculation.
 The following flux query will be run first to count the values and union them into a single table.
