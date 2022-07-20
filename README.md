@@ -61,7 +61,7 @@
 
 
 # Introduction
-Big Data, IoT, and analytics, and as a result, new methods of storing this fluid data have emerged. Almost all streaming data, particularly IoT data, but also real-time analytics and server and application monitoring, has a time stamp and thus is time series data. This project will go on to demonstrate the differences between traditional databases and NoSQL (time series) databases, why they are used, and how to build a project on top of them. The completed project stores, visualizes, and classifies data using InfluxDB2, Python, and Grafana using time-stamped CSV data containing bird migration data as a time analytics approach.
+Big Data, IoT, and analytics, and as a result, new methods of storing this fluid data have emerged. Almost all streaming data, particularly IoT data, but also real-time analytics and server and application monitoring, has a time stamp and thus is time series data. This project will go on to demonstrate the differences between traditional databases and NoSQL (time series) databases, why time series datbases are used, and how to build a project on top of them. The completed project stores, visualizes, and classifies data using InfluxDB2, Python, and Grafana using time-stamped CSV data containing bird migration data as a time analytics approach.
 
 # Fundamentals
 ## NoSQL basics
@@ -70,10 +70,10 @@ Because NoSQL distributes its data, it must adhere to the CAP theorem, which sta
 
 ## NoSQL vs Relational Databases
 NoSQL and relational databases both have the same basic goals: to store and retrieve data, as well as to coordinate changes. The distinction is that NoSQL databases abandon some of the capabilities of relational databases in order to increase scalability. NoSQL databases, in particular, typically have much simpler coordination capabilities than traditional relational systems, sometimes even none at all. NoSQL databases typically remove all or most of the SQL query language, as well as a complex optimizer required for SQL to be useful.
-The benefit of the tradeoff is that NoSQL databases are often very simple and can handle unstructured data, resulting in higher scalability in the best case. This has the disadvantage of losing overview by storing a large amount of unstructured and unformatted data, and optimization is in the hands of the developr rather than the optimizer when using relational databases. [4]
+The benefit of the tradeoff is that NoSQL databases are often very simple and can handle unstructured data, resulting in higher scalability in the best case. This has the disadvantage of losing overview by storing a large amount of unstructured and unformatted data, and optimization is in the hands of the developer rather than the optimizer when using relational databases. [4]
 
 ## Time Series Databases
-A time series is a grouping of values organized by time. Stock prices, for example, may fluctuate throughout the day as trades are executed, or a weather sensor may record atmospheric temperatures every minute. Any event that is recorded over time, whether on a regular or irregular basis, is considered time series data. A time series database is intended to make time series data retrieval and statistical analysis easier. While time series data like orders, shipments, and logs have long been stored in relational databases, the data sizes and volumes were frequently insignificant. As data grew faster and larger, special-purpose databases became necessary. Time series databases, for example, address the needs of increasing, high-velocity data volumes from IoT, event, and application logs. These are frequently write-intensive workloads. As a result, memory buffering is frequently used to support fast writes and reads in time series databases. Looking at the CAP Theorem, InfluxDB focuses on either CP or AP but tries to find a middle ground between the two. [3, 5]
+A time series is a grouping of values organized by time. Stock prices, for example, may fluctuate throughout the day as trades are executed, or a weather sensor may record atmospheric temperatures every minute. Any event that is recorded over time, whether on a regular or irregular basis, is considered time series data. A time series database is intended to make time series data retrieval and statistical analysis easier. While time series data like orders, shipments, and logs have long been stored in relational databases, the data sizes and volumes were frequently insignificant. As data grew faster and larger, special-purpose databases became necessary. Time series databases, for example, address the needs of increasing, high-velocity data volumes from IoT, event, and application logs. These are frequently write-intensive workloads. As a result, memory buffering is frequently used to support fast writes and reads in time series databases. [3, 5]
 
 ## Why use a time series database
 It is necessary to consider the problems that time series databases attempt to solve. IoT devices and real-time analytics generate a large amount of data, and with the increasing amount of data produced with a time stamp, there must be a way to deal with this. Regular time series data, such as measurements taken every 10 seconds, and irregular data, such as API requests, are the two types of time series data. A modern time series database should be capable of handling both types of data. Time series databases are designed to deal with problems that arise with these high volume measurement data, and as a result, they solve three major characteristics with the data they use: exceptionally high volume, natural time order, and the entire set of data being more valuable than individual records. When these issues arise in the development of an application or system, it is recommended that a time series database is used. They concentrate on optimizing frequent writes, merging data, and constructing sums and averages in order to treat the data as a whole and store combined data beyond the retention period. They also provide optimized query languages for handling data based on the use case. [7]
@@ -81,7 +81,7 @@ Consider using a traditional SQL database to store time series data. In general,
 
 ## InfluxDB basics
 According to https://db-engines.com/, InfluxDB is the most popular NoSQL time series database created by InfluxData. Its primary application is handling massive amounts of time-stamped data. Collecting IoT data is a common example because every data set in IoT is time-based. However, it is frequently used for analytics as well as IoT data, for example, in this project time-stamped data for bird migration will be handled using InfluxDB2.
-The first version of InfluxDB came out in 2013 and the 1.x version is still commonly used. However, in 2020 InfluxDB was released as a stable version and is the way to go. It features a new query language, which will be explained in the next section, as well as a standalone binary with a graphical web interface to explore data. [9, 10]
+The first version of InfluxDB came out in 2013 and the 1.x version is still commonly used. However, in 2020 InfluxDB was released as a stable version and is the way to go. It features a new query language, which will be explained in the next section, as well as a standalone binary with a graphical web interface to explore data.  Looking at the CAP Theorem, InfluxDB focuses on either CP or AP but tries to find a middle ground between the two. [9, 10]
 
 ### Flux Query Language
 
@@ -100,12 +100,12 @@ Typically, a bucket, which is a store for time series data in InfluxDB, will be 
 
 <div style="page-break-after: always;"></div>
 
-As an example, consider the following query that filters data in a time range of 12 hours and selects the fields `lat` and `lon` as location data and with the measurement tag `location`:
+As an example, consider the following query that filters data in a time range of 12 hours and selects the fiels `lat` as location data with the measurement tag `location`:
 
 ```sql
 from(bucket: "bucket")
     |> range(start: 2021-01-01T00:00:00Z, stop: 2021-01-01T12:00:00Z)
-    |> filter(fn: (r) => r._measurement == "location" and r._field == "lat" and r.lat == "lat")
+    |> filter(fn: (r) => r._measurement == "location" and r._field == "lat")
 ```
 
 [11, 12]
@@ -140,7 +140,7 @@ A distribution over a set of classes is calculated given an observation of an in
 
 <img src="./docs/images/classification/naive-bayes-2.png" alt="drawing" width="170"/>
 
-Given enough training data the probability can be predicted based on a given field. A simplified example would be that if a bird is in the northern hemisphere in the winter we could predict which season of the year it, e.g.:
+Given enough training data the probability can be predicted based on a given field. A simplified example would be that if a bird is in the tropical climate zone of the earth at a certain time it could be predicted which season of the year it, e.g.:
 
 <img src="./docs/images/classification/naive-bayes-3.png" alt="drawing" width="200"/>
 
@@ -156,7 +156,7 @@ This type of classification can be performed using the Flux query language.
 ## Goals
 The purpose of this project is to process a large amount of time series data. The data is stored using a NoSQL approach with InfluxDB. A Grafana Dashboard is constructed to visualize the data, and appropriate visualisation tools are employed. The data will be parsed using
 Python and processed to InfluxDB using functional programming in combination with the Python
-client library provided by InfluxDB. Using Flux a classification will be done on the existing dataset.
+client library provided by InfluxDB. Using Flux, a classification will be done on the existing dataset.
 
 ## The data - Movebank: Animal tracking
 
@@ -265,7 +265,7 @@ To access the InfluxDB web interface, ``localhost:8086`` has to be accessed. The
 
 Because data should be injected manually, "Configure later" should be selected in the following step.
 The final step in setting up InfluxDB is to obtain the necessary API token.
-To do so, the 'Data' tab in the left sidebar is selected, followed by the "API Tokens" tab in the tab view on top. A window will appear when clicked on root's Token including the API Token. To access the InfluxDB from an external application, the token should be saved somewhere. Because security is not an issue in this proof of concept, the root token can be sued; however, in a production environment, separate users with access rights should be set up.
+To do so, the 'Data' tab in the left sidebar is selected, followed by the "API Tokens" tab in the tab view on top. A window will appear when clicked on root's Token including the API Token. To access the InfluxDB from an external application, the token should be saved somewhere. Because security is not an issue in this proof of concept, the root token can be used; however, in a production environment, separate users with access rights should be set up.
 
 ![alt text](./docs/images/influxdb-setup/api-token-1.png)*InfluxDB API-Token 1/2*
 
@@ -299,7 +299,7 @@ $ python3 main.py
 # Output: Hello World
 ```
 
-For the dependencies a ``requirements.txt``file is created in the project's root directory with following content to install the python client library for InfluxDB using pip. To make sure they are locally available, the following command has to be executed:
+For the dependencies a ``requirements.txt`` file is created in the project's root directory with following content to install the python client library for InfluxDB using pip. To make sure they are locally available, the following command has to be executed:
 
 
 ```properties
@@ -343,7 +343,7 @@ This script builds this application into a Docker Image, creates a network and s
 $ ./run.sh
 # Output: Hello World
 ```
-Every time the the application needs to be started locally locally, the ``run.sh`` script can be run.
+Every time the the application needs to be started locally, the ``run.sh`` script can be run.
 
 ### Implementing functionality
 
@@ -434,11 +434,11 @@ data = rx \
     .pipe(operators.map(lambda row: parse_row(row)))
 ```
 
-The command above maps each row from the source data set to an Ordered Dictionary entry and parses it to a. Afterwards we are left with a dictionary that is readable by the InfluxDB data client.
+The command above maps each row from the source data set to an Ordered Dictionary entry and parses it to a Point. Afterwards a dictionary is creted that is readable by the InfluxDB data client.
 
 > Example adapted from: https://github.com/influxdata/influxdb-client-python/blob/master/examples/import_data_set.py (visited: June 4th, 22:00)
 
-The code below establishes a connection to InfluxDB, creates a new bucket using the Bucket API, and writes data to InfluxBD using the Write API, all of which are provided by the Python library.
+The code below establishes a connection to InfluxDB, creates a new bucket using the Bucket API, and writes data to InfluxDB using the Write API, all of which are provided by the Python library.
 
 
 ```python
@@ -494,7 +494,7 @@ The blue 'Add data source' button next to the search bar must then be pressed. I
 
 ![alt text](./docs/images/grafana-setup/configure-influxdb-datasource.png)*Grafana defining a data source*
 
-The Query Language should be `Flux`, and the URL should be `http://influxdb:8086`, as defined by the docker compose DNS-Resolution. Basic authentication is used, with the username `root` and password `password`. In the final section, enter the organization name from the Influx-Setup, which is `pmoritzer` in this case, the root's API token, and the default bucket, which is `bird-migration` in this case. The 'Save & Test' button can be used to see if the connection works.
+The Query Language should be `Flux`, and the URL should be `http://influxdb:8086`, as defined by the docker compose DNS-Resolution. Basic authentication is used, with the username `root` and password `password`. In the final section, the organization name should be entered from the Influx-Setup, which is `pmoritzer` in this case, the root's API token, and the default bucket, which is `bird-migration` in this case. The 'Save & Test' button can be used to see if the connection works.
 
 ![alt text](./docs/images/grafana-setup/grafana-connection-success.png)*Grafana: successful creation of InfluxDB data source*
 
@@ -505,13 +505,13 @@ The data is then visualized using a dashboard, which is created in the following
 
 ![alt text](./docs/images/grafana-setup/dashboard-entry.png)*Grafana: Dashboard entry point*
 
-Then, by pressing 'New Dashboard,' a new dashboard should be created. In the next step, a new panel can be added to the new dashboard and used to visualize data.
+Then, by pressing 'New Dashboard', a new dashboard should be created. In the next step, a new panel can be added to the new dashboard and used to visualize data.
 
 ## Visualizing and analyising the data
 
 ### Dashboard variables
 
-The dataset contains 48 bird identifiers that should be filterable. A dashboard variable will be created to make this available. The gear symbol in the upper right corner must be selected, and the 'Variables' tab in the left sidebar must be accessed and a new variable created by clicking the 'New' button in the resulting window. The new variable should be named `localIdentifier` and should be derived from the type query. It is attempted to filter individual identifier names from the entire data set in order to obtain one entry for each bird in order to distinguish the birds as a variable. InfluxDB is queried by selecting the previously created data source. The following query must be entered in the text field:
+The dataset contains 49 bird identifiers that should be filterable. A dashboard variable will be created to make this available. The gear symbol in the upper right corner must be selected, and the 'Variables' tab in the left sidebar must be accessed and a new variable created by clicking the 'New' button in the resulting window. The new variable should be named `localIdentifier` and should be derived from the type query. It is attempted to filter individual identifier names from the entire data set in order to obtain one entry for each bird in order to distinguish the birds as a variable. InfluxDB is queried by selecting the previously created data source. The following query must be entered in the text field:
 
 ```sql
 from(bucket:"bird-migration")
@@ -648,7 +648,7 @@ The configuration steps are numbered in the screenshot below and will be explain
 
   *Geomap: Color Mapping Transform*
 
-A new panel is created for the heatmap. The query's data source is `— Dashboard --` because the same data as in the geomap is used. `Use results from panel: Geomap` should be selected from the dropdown menu. 'Heatmap' should now be applied to the layer options in 4. A heatmap is created by reusing data from the first panel's queries. 
+A new panel is created for the heatmap. The query's data source is `—- Dashboard --` because the same data as in the geomap is used. `Use results from panel: Geomap` should be selected from the dropdown menu. 'Heatmap' should now be applied to the layer options in 4. A heatmap is created by reusing data from the first panel's queries. 
 
 <div style="page-break-after: always;"></div>
 
@@ -672,7 +672,7 @@ A new panel with two Flux-queries should be created. Instead of Geomap, choose '
 
 <div style="page-break-after: always;"></div>
 
- As the `A` query is used, the following query is used:
+ For the `A` query the following query is used:
 
 ```sql
 from(bucket: "bird-migration")
@@ -1032,7 +1032,7 @@ The final dashboard should look as follows:
 InfluxDB is an excellent tool for dealing with large datasets of time series data. It is suitable for real-time analytics when combined with its Python library. The query language Flux is capable of performing extensive data analytics, as demonstrated by classification and visualization.
 
 ## Outlook
-This project takes a predefined dataset and processes it to InfluxDB in batches. Even though the queries would still work when streaming data, this project has not tested them. It could be an interesting approach to real-time analytics using InfluxDB and streaming data. Streaming IoT data from sensors to an Influx instance or even a distributed InfluxDB instance could be another interesting approach.
+This project takes a predefined dataset and processes it to InfluxDB in batches. Even though the queries would still work when streaming data, this project has not proved this. It could be an interesting approach to do real-time analytics using InfluxDB and streaming data. Streaming IoT data from sensors to an Influx instance or even a distributed InfluxDB instance could be another interesting approach.
 
 ## Repository and sample project
 The whole source code can be found under the following GitHub repository: 
