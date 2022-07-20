@@ -57,6 +57,8 @@
   - [Demo](#demo)
 - [Sources](#sources)
 
+<div style="page-break-after: always;"></div>
+
 
 # Introduction
 Big Data, IoT, and analytics, and as a result, new methods of storing this fluid data have emerged. Almost all streaming data, particularly IoT data, but also real-time analytics and server and application monitoring, has a time stamp and thus is time series data. This project will go on to demonstrate the differences between traditional databases and NoSQL (time series) databases, why they are used, and how to build a project on top of them. The completed project stores, visualizes, and classifies data using InfluxDB2, Python, and Grafana using time-stamped CSV data containing bird migration data as a time analytics approach.
@@ -94,7 +96,11 @@ from(bucket)
 
 The pipe symbol `|>` marks pipe forward data and therefore every function or expression that follows after that symbol takes the former expression as an input.
 
-Typically, a bucket, which is a store for time series data in InfluxDB, will be chosen first to serve as a source. A time range is required for a flux query because queries without a time window are resource-intensive; therefore, it is up to the user to specify a common time-window that complements the data required. When only these fields are specified in the query, the result is an output table with a timestamp as the individual identifier key and the measurements. Following that, one can filter the data based on their requirements, such as after a field. There are also many built-in functions that can be used to reduce, sum up, interpret, or map data. This can be used to prepare the data for visualization or other purposes (e.g. classification, machine learning). As an example, consider the following query that filters data in a time range of 12 hours and selects the fields `lat` and `lon` as location data and with the measurement tag `location`:
+Typically, a bucket, which is a store for time series data in InfluxDB, will be chosen first to serve as a source. A time range is required for a flux query because queries without a time window are resource-intensive; therefore, it is up to the user to specify a common time-window that complements the data required. When only these fields are specified in the query, the result is an output table with a timestamp as the individual identifier key and the measurements. Following that, one can filter the data based on their requirements, such as after a field. There are also many built-in functions that can be used to reduce, sum up, interpret, or map data. This can be used to prepare the data for visualization or other purposes (e.g. classification, machine learning). 
+
+<div style="page-break-after: always;"></div>
+
+As an example, consider the following query that filters data in a time range of 12 hours and selects the fields `lat` and `lon` as location data and with the measurement tag `location`:
 
 ```sql
 from(bucket: "bucket")
@@ -132,7 +138,7 @@ Based on the input, the Naive Bayes classification is described as a probabilist
 
 A distribution over a set of classes is calculated given an observation of an input. After that, the classifier can be trained to determine which class has the highest probability. Consider the the following:
 
-<img src="./docs/images/classification/naive-bayes-2.png" alt="drawing" width="200"/>
+<img src="./docs/images/classification/naive-bayes-2.png" alt="drawing" width="170"/>
 
 Given enough training data the probability can be predicted based on a given field. A simplified example would be that if a bird is in the northern hemisphere in the winter we could predict which season of the year it, e.g.:
 
@@ -143,6 +149,7 @@ This type of classification can be performed using the Flux query language.
 
 [11, 16, 17]
 
+<div style="page-break-after: always;"></div>
 
 # Tutorial
 
@@ -176,7 +183,11 @@ $ docker-comopse --version
 ## Spinning up the composition
 
 ### docker-compose
-There is no need to install InfluxDB or Grafana locally to quickly spin up the environment. Although it is possible to follow along using locally installed or remotely hosted instances, docker-compose makes it easier to spin up the services. If no project root has yet been created, create a new folder for the project and add the following ``docker-compose.yml`` file:
+There is no need to install InfluxDB or Grafana locally to quickly spin up the environment. Although it is possible to follow along using locally installed or remotely hosted instances, docker-compose makes it easier to spin up the services.
+
+<div style="page-break-after: always;"></div>
+
+If no project root has yet been created, create a new folder for the project and add the following ``docker-compose.yml`` file:
 ```yaml
 version: "3.9"
 
@@ -222,7 +233,11 @@ Volumes are used by both InfluxDB and Grafana. The next step is to make sure tha
 ```
 
 Also a network is added in the ``docker-compose.yml`` file so the Python application is able to communicate with the services on the same network later on when using Docker.
-Docker-compose is used to spin up a local instance of InfluxDB and Grafana. To start both services, following command has to be entered: 
+Docker-compose is used to spin up a local instance of InfluxDB and Grafana. 
+
+<div style="page-break-after: always;"></div>
+
+To start both services, following command has to be entered: 
 
 ```bash
 docker-compose up
@@ -232,11 +247,11 @@ docker-compose up
 
 The InfluxDB exposed the Port 8086 for the web interface and should now be reachable locally on ``http://localhost:8086/``:
 
-InfluxDB on localhost:8086
+![alt text](./docs/images/docker-compose-setup/influx-welcome.png "Influx running on localhost:8086") *InfluxDB on localhost:8086*
 
-![alt text](./docs/images/docker-compose-setup/influx-welcome.png "Influx running on localhost:8086") 
+<div style="page-break-after: always;"></div>
 
-While Grafana uses Port 3000 for its web interface and should be reachable by typint ``http://localhost:3000`` in a browser:
+While Grafana uses Port 3000 for its web interface and should be reachable by typing ``http://localhost:3000`` in a browser:
 
 ![alt text](./docs/images/docker-compose-setup/grafana-welcome.png "Grafana running on localhost:3000") *Grafana on localhost:3000*
 
@@ -248,13 +263,15 @@ To access the InfluxDB web interface, ``localhost:8086`` has to be accessed. The
 
 ![alt text](./docs/images/influxdb-setup/initial-account.png)*First setup step for InfluxDB*
 
-Because we want to inject data manually, simply select "Configure later" in the following step.
+Because data should be injected manually, "Configure later" should be selected in the following step.
 The final step in setting up InfluxDB is to obtain the necessary API token.
-To do so, select the Data tab in the left sidebar, followed by the "API Tokens" tab in the tab view on top. A window will appear when you click on root's Token including the API Token. To access the InfluxDB from an external application, the token should be saved somewhere. Because security is not an issue in this proof of concept, we can use the root token; however, in a production environment, separate users with access rights should be set up.
+To do so, the 'Data' tab in the left sidebar is selected, followed by the "API Tokens" tab in the tab view on top. A window will appear when clicked on root's Token including the API Token. To access the InfluxDB from an external application, the token should be saved somewhere. Because security is not an issue in this proof of concept, the root token can be sued; however, in a production environment, separate users with access rights should be set up.
 
 ![alt text](./docs/images/influxdb-setup/api-token-1.png)*InfluxDB API-Token 1/2*
 
 ![alt text](./docs/images/influxdb-setup/api-token-2.png)*InfluxDB API-Token 2/2*
+
+<div style="page-break-after: always;"></div>
 
 ## Writing the client application
 
@@ -267,7 +284,7 @@ INFLUX_TOKEN=<root-api-token>
 INFLUX_ORG=<org-name>
 ```
 
-Replace the ``INFLUX_TOKEN`` property to equal the generated API-Token from the setup and the ``INFLUX_ORG`` properties with the organization name set. The data processing client application is able to connect to the database by loading these definded properties.
+The ``INFLUX_TOKEN`` property should be replaced to equal the generated API-Token from the setup and the ``INFLUX_ORG`` properties with the organization name set. The data processing client application is able to connect to the database by loading these definded properties.
 
 ### Setting up the application
 
@@ -295,6 +312,7 @@ $ pip3 install -r requirements.txt
 
 Next, the application is going to be dockerized. To do so, a `Dockerfile` will be created. Docker ensures that the application can run with the dependencies defined regardless of the system's environment.
 
+<div style="page-break-after: always;"></div>
 
 ```Dockerfile
 # syntax=docker/dockerfile:1
@@ -311,7 +329,7 @@ COPY . .
 CMD ["python3","-u","./main.py"]
 ```
 
-Create a ``run.sh`` script (or ``.bat`` for Windows Users) that executes following commands in a row:
+A ``run.sh`` script (or ``.bat`` for Windows Users) should be created that executes following commands in a row:
 
 ```bash
 $ docker build --no-cache -t influxdb-sample .
@@ -464,6 +482,8 @@ To setup Grafana, `localhost:3000` has to be accessed. A login can be performed 
  
  The creation of a new account can be skipped, or a new password can be set.
 
+ <div style="page-break-after: always;"></div>
+
 ### Defining InfluxDB as a data source
 
 The data source tab from the left side menu has to be selected:
@@ -477,6 +497,8 @@ The blue 'Add data source' button next to the search bar must then be pressed. I
 The Query Language should be `Flux`, and the URL should be `http://influxdb:8086`, as defined by the docker compose DNS-Resolution. Basic authentication is used, with the username `root` and password `password`. In the final section, enter the organization name from the Influx-Setup, which is `pmoritzer` in this case, the root's API token, and the default bucket, which is `bird-migration` in this case. The 'Save & Test' button can be used to see if the connection works.
 
 ![alt text](./docs/images/grafana-setup/grafana-connection-success.png)*Grafana: successful creation of InfluxDB data source*
+
+<div style="page-break-after: always;"></div>
 
 ### Creating a dashboard
 The data is then visualized using a dashboard, which is created in the following step. The Dashboard option in Grafana must be selected to create a dashboard, as shown in the screenshot below:
@@ -626,7 +648,11 @@ The configuration steps are numbered in the screenshot below and will be explain
 
   *Geomap: Color Mapping Transform*
 
-A new panel is created for the heatmap. The query's data source is `— Dashboard --` because the same data as in the geomap is used. `Use results from panel: Geomap` should be selected from the dropdown menu. 'Heatmap' should now be applied to the layer options in 4. A heatmap is created by reusing data from the first panel's queries. The following is the configuration:
+A new panel is created for the heatmap. The query's data source is `— Dashboard --` because the same data as in the geomap is used. `Use results from panel: Geomap` should be selected from the dropdown menu. 'Heatmap' should now be applied to the layer options in 4. A heatmap is created by reusing data from the first panel's queries. 
+
+<div style="page-break-after: always;"></div>
+
+The following image shows the configuration:
 
 ![alt text](./docs/images/visualization/heatmap.png)
 
@@ -642,7 +668,11 @@ The visualization results should now look like this. Individual identifiers can 
 
 The latitude should then be visualized over time. Because birds migrate back and forth over the seasons, the expected data should be similar to a sine/cosine function.
 
-A new panel with two Flux-queries should be created. Instead of Geomap, choose 'Time Series' from the list. Everything on the right side can be customized to one's liking. Only the line interpolation is changed for this visualization to create a smoother curve. As the `A` query is used, the following query is used:
+A new panel with two Flux-queries should be created. Instead of Geomap, choose 'Time Series' from the list. Everything on the right side can be customized to one's liking. Only the line interpolation is changed for this visualization to create a smoother curve.
+
+<div style="page-break-after: always;"></div>
+
+ As the `A` query is used, the following query is used:
 
 ```sql
 from(bucket: "bird-migration")
@@ -661,6 +691,8 @@ The whole configuration and the result can be viewed in the following picture:
 ![alt text](./docs/images/visualization/latitude-complete.png)
 
 *Results of the latitude over time visualization*
+
+<div style="page-break-after: always;"></div>
 
 ### Classification
 
@@ -739,6 +771,8 @@ The data will be kept in this panel and a new panel will be created in the dashb
 *Binary table for classification*
 
 Considering the Bayes theorem with following example, these assumptions can be made. The climate zone 'tropes' is choosen as a field and calculate the probability of it being winter (class). This is going to be done for every field.
+
+<div style="page-break-after: always;"></div>
 
 | **Result**              | **Formula**                                 |
 |-------------------------|---------------------------------------------|
@@ -984,6 +1018,7 @@ And the resulting trained classifier should be created and displayed in a table:
 Using the location of birds as a value, this type of classifier can predict which season is in effect with a degree of precision. Interesting data points include the fact that if a bird is in the cold zone of the earth, the current season is winter 70% of the time. There are no birds in the cold zone during the winter, so it is certain that if a bird is in the cold zone, it is not winter. Another expected result is that if a bird is in a tropical zone, it is most likely winter, but this can only be said with a certainty of 34.1 percent; rather, if a bird is in a subtropical zone, it is more likely to be winter with a certainty of 37.9 percent. The problem may be that the climate zones are not fine-grained enough for categorizing the position of the birds, particularly between the subtropicals and the tropicals.
 This classifier takes the whole dataset as training data. By changing the time window it is possible to change the dataset and therefore to get a differently trained classifier.
  
+<div style="page-break-after: always;"></div>
 
 # Summary
 ## Result
@@ -1004,7 +1039,11 @@ The whole source code can be found under the following GitHub repository:
 
 Source Code Repository: https://github.com/philippmoritzer/bd-ml-project
 
-If some step does not work or the project just wants to be tried, the project can be just checked out using git. After running `docker-compose up`, InfluxDB should be spun up on `localhost:8086` and Grafana sould be accessible on `localhost:3000`.
+If some step does not work or the project just wants to be tried, the project can be just checked out using git.
+
+<div style="page-break-after: always;"></div>
+
+After running `docker-compose up`, InfluxDB should be spun up on `localhost:8086` and Grafana sould be accessible on `localhost:3000`.
 
 ```properties
 #Login InfluxDB
@@ -1034,6 +1073,8 @@ user=admin
 password=bd-ml-2022
 ```
 
+<div style="page-break-after: always;"></div>
+
 # Sources
 - [1]   Brad Dayley. Sams Teach Yourself NoSQL with MongoDB in 24 Hours, Video Enhanced Edition. O'REILLY. 2014.
 - [2]   Kasun Idrasiri, Sriskandarajah Suhothayan. Design Patterns for Cloud Native Applications. O'REILLY. 2021.
@@ -1048,6 +1089,6 @@ password=bd-ml-2022
 - [11]  Rohan Sreerama. A Deep Dive into Machine Learning in Flux: Naive Bayes Classification. 2020. URL: https://www.influxdata.com/blog/deep-dive-into-machine-learning-in-flux-naive-bayes-classification/ (visited: 10.07.2022, 20:15)
 - [12]  Igor Bobriakov. Prometheus vs InfluxDB. 2020. URL: https://www.metricfire.com/blog/prometheus-vs-influxdb/ (visited: 10.07.2022, 20:15)
 - [13]  db-engines. System Properties Comparison InfluxDB vs. Prometheus vs. TimescaleDB. 2022, URL: https://db-engines.com/en/system/InfluxDB%3BPrometheus%3BTimescaleDB (visited: 10.07.2022, 20:15)
-- [14]  United Manufacturing Hub. Why we chose timescaleDB over InfluxDB. 2022, URL: https://docs.umh.app/docs/concepts/timescaledb-vs-influxdb/
+- [14]  United Manufacturing Hub. Why we chose timescaleDB over InfluxDB. 2022, URL: https://docs.umh.app/docs/concepts/timescaledb-vs-influxdb/ (visited: 10.07.2022, 2015)
 - [15]  Team Magic. Building a Naive Bayes classifier using Flux. 2020. URL: https://github.com/RohanSreerama5/Naive-Bayes-Classifier-Flux/blob/master/Naive%20Bayes.pdf (visited: 10.07.2022, 20:15)
 - [16]  Rohan Sreerama. Naive-Bayes-Classifier-Flux. 2020. URL: https://github.com/RohanSreerama5/Naive-Bayes-Classifier-Flux (visited: 10.07.2022)
