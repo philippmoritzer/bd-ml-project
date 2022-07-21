@@ -698,6 +698,8 @@ The whole configuration and the result can be viewed in the following picture:
 
 This classification's goal is to create a classification using Naive Bayes. The primary objective is to forecast the season based on training data.
 
+> Note: This classification is done based on one the species that is contained in the dataset that does migrate. The seasons are based on the northern hemisphere (Europe). It is rather a technological demo than a real-world use case for classification in data science.
+
 $$ P(season | location) $$
 
  Pre-processing is required first. To make things clear, the time will be divided into four seasons (winter, spring, summer, and autumn), and the locations will be mapped to climate zones as follows:
