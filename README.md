@@ -731,6 +731,8 @@ The training data is then transferred to a binary table in the following manner:
 | summer     | 0      | 0      | 1      | 0      |
 | spring     | 0      | 1      | 0      | 0      |
 
+<div style="page-break-after: always;"></div>
+
 A new panel has to be created on the existing Grafana dashboard with a Table as visulization option and an InfluxDB as a data source. Following query will built the table displayed above:
 
 ```sql
